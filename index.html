@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interaktívny analytický nástroj investičnej efektívnosti zemských zdrojov v EÚ</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --ink:#111111;
+      --muted:#626262;
+      --line:#e8e1d2;
+      --card:#ffffff;
+      --soft:#fbf8ef;
+      --gold:#d6a84f;
+      --gold-dark:#8c6a24;
+      --gold-soft:#f4d98b;
+      --black:#080808;
+      --green:#228b57;
+      --yellow:#f1c84b;
+      --red:#c84b4b;
+      --shadow:0 16px 45px rgba(17,17,17,.08);
+      --radius:22px;
+      --radius-sm:14px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:var(--bg);
+      color:var(--ink);
+      line-height:1.5;
+    }
+    .hero{
+      padding:34px clamp(18px,4vw,56px) 26px;
+      background:linear-gradient(135deg,#fff 0%,#fffaf0 44%,#f4e0a4 100%);
+      border-bottom:1px solid var(--line);
+      position:relative;
+      overflow:hidden;
+    }
+    .hero:after{
+      content:"";
+      position:absolute;
+      right:-110px;top:-130px;
+      width:360px;height:360px;
+      background:radial-gradient(circle,rgba(214,168,79,.25),rgba(214,168,79,0) 68%);
+      pointer-events:none;
+    }
+    .hero-inner{max-width:1480px;margin:0 auto;position:relative;z-index:1}
+    .eyebrow{font-size:13px;font-weight:800;letter-spacing:.11em;text-transform:uppercase;color:var(--gold-dark);margin:0 0 8px}
+    h1{font-size:clamp(28px,4.2vw,58px);line-height:1.03;margin:0;color:var(--black);letter-spacing:-.04em}
+    .subtitle{font-size:clamp(15px,1.7vw,22px);color:var(--muted);max-width:1040px;margin:16px 0 0}
+    .author{margin:14px 0 0;display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(140,106,36,.25);background:rgba(255,255,255,.74);border-radius:999px;padding:8px 13px;font-size:14px;font-weight:900;color:var(--gold-dark)}
+    .wrap{max-width:1480px;margin:0 auto;padding:26px clamp(14px,3vw,36px) 70px}
+    .toolbar{
+      display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;
+      margin:0 0 22px;padding:14px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);
+      position:sticky;top:0;z-index:5;
+    }
+    .toolbar-group{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    button,.btn{
+      border:0;border-radius:999px;padding:11px 16px;font-weight:800;cursor:pointer;
+      background:var(--black);color:#fff;box-shadow:0 8px 20px rgba(0,0,0,.12);transition:.18s ease;
+    }
+    button:hover{transform:translateY(-1px);box-shadow:0 12px 26px rgba(0,0,0,.16)}
+    button.secondary{background:#fff;color:var(--black);border:1px solid var(--line);box-shadow:none}
+    button.gold{background:var(--gold);color:#111}
+    button.danger{background:#fff;color:var(--red);border:1px solid rgba(200,75,75,.35);box-shadow:none}
+    .grid{display:grid;gap:18px}
+    .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .card{
+      background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;
+    }
+    .card.soft{background:var(--soft)}
+    .section-title{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin:24px 0 14px}
+    .section-title h2{font-size:clamp(20px,2vw,30px);margin:0;letter-spacing:-.025em;color:var(--black)}
+    .section-title p{margin:6px 0 0;color:var(--muted);max-width:940px}
+    label{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:800;margin:0 0 6px}
+    input,select,textarea{
+      width:100%;padding:11px 12px;border:1px solid #d9d1c0;border-radius:13px;background:#fff;color:var(--black);font:inherit;outline:none;
+    }
+    input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 4px rgba(214,168,79,.15)}
+    .field{min-width:0}
+    .hint{font-size:12px;color:var(--muted);margin-top:6px}
+    .kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px;margin:18px 0}
+    .kpi{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 10px 25px rgba(17,17,17,.05)}
+    .kpi .name{font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:900}
+    .kpi .value{font-size:clamp(20px,2.2vw,34px);font-weight:900;letter-spacing:-.03em;margin:6px 0 0;color:var(--black)}
+    .kpi .note{font-size:12px;color:var(--muted);margin-top:6px}
+    .pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:900;background:#fff;border:1px solid var(--line)}
+    .pill.good{color:var(--green);border-color:rgba(34,139,87,.3);background:rgba(34,139,87,.07)}
+    .pill.warn{color:#9a6c00;border-color:rgba(241,200,75,.55);background:rgba(241,200,75,.13)}
+    .pill.bad{color:var(--red);border-color:rgba(200,75,75,.35);background:rgba(200,75,75,.08)}
+    .chart-card{height:420px;position:relative}
+    .chart-card.tall{height:520px}
+    .chart-card canvas{width:100%!important;height:100%!important}
+    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:18px;background:#fff}
+    table{width:100%;border-collapse:collapse;font-size:13px;min-width:860px}
+    th,td{padding:10px 12px;border-bottom:1px solid #eee7d8;text-align:right;white-space:nowrap}
+    th:first-child,td:first-child{text-align:left}
+    th{position:sticky;top:0;background:#111;color:#f4d98b;z-index:1;font-weight:900}
+    tr:hover td{background:#fffaf0}
+    .matrix table{min-width:700px}
+    .matrix td,.matrix th{text-align:center}
+    .heat-good{background:#dff3e7!important;color:#0b5b35;font-weight:800}
+    .heat-mid{background:#fff2c3!important;color:#7a5400;font-weight:800}
+    .heat-bad{background:#f7d8d8!important;color:#8b1e1e;font-weight:800}
+    .interpretation{white-space:pre-wrap;background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;color:#242424;font-size:15px}
+    .progress{height:12px;background:#f0eadc;border-radius:999px;overflow:hidden;border:1px solid var(--line);min-width:220px}
+    .bar{height:100%;width:0%;background:linear-gradient(90deg,var(--gold-soft),var(--gold-dark));transition:width .2s ease}
+    .status{font-size:13px;color:var(--muted);font-weight:700}
+    .small-list{margin:8px 0 0;padding-left:18px;color:var(--muted);font-size:13px}
+    .footer-note{font-size:12px;color:var(--muted);margin-top:30px;border-top:1px solid var(--line);padding-top:18px}
+    @media (max-width:1100px){.grid-4{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-3{grid-template-columns:repeat(2,minmax(0,1fr))}.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media (max-width:720px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.toolbar{position:static}.chart-card{height:350px}table{font-size:12px}.hero{padding-top:26px}}
+    @media print{.toolbar,button{display:none!important}.card{box-shadow:none}.wrap{padding:0}.chart-card{break-inside:avoid}.hero{border-bottom:1px solid #ddd}}
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Interaktívny webový analytický nástroj</p>
+      <h1>Analytický nástroj investičnej efektívnosti zemských zdrojov v EÚ</h1>
+      <p class="author">Autor: Ing. Maksym Mykhei</p>
+      <p class="subtitle">Ukážkový teoretický nástroj pre akademickú analýzu: NPV, IRR, ERIEI, scenárová analýza, citlivosť a Monte Carlo simulácia.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <nav class="toolbar">
+      <div class="toolbar-group">
+        <button class="gold" id="btnCalc">Prepočítať výsledky</button>
+        <button class="secondary" id="btnRunMC">Spustiť Monte Carlo</button>
+        <button class="secondary" id="btnReset">Resetovať</button>
+      </div>
+      <div class="toolbar-group">
+        <div class="progress" title="Priebeh Monte Carlo"><div class="bar" id="mcProgress"></div></div>
+        <span class="status" id="mcStatus">Monte Carlo pripravené</span>
+      </div>
+      <div class="toolbar-group">
+        <button class="secondary" id="btnExportResults">Export výsledkov CSV</button>
+        <button class="secondary" id="btnExportCF">Export cash-flow CSV</button>
+        <button class="secondary" id="btnExportMC">Export Monte Carlo CSV</button>
+        <button class="secondary" id="btnCopyInterpretation">Kopírovať interpretáciu</button>
+        <button class="secondary" id="btnPrint">Tlačiť / PDF</button>
+      </div>
+    </nav>
+
+    <section class="grid grid-2">
+      <div class="card">
+        <div class="section-title" style="margin-top:0"><div><h2>1. Výber štátu EÚ a ERIEI prostredie</h2><p>Prednastavené hodnoty majú ilustračný charakter a sú editovateľné. Vyššie ERIEI znižuje rizikovú prirážku.</p></div></div>
+        <div class="grid grid-2">
+          <div class="field"><label for="country">Štát EÚ</label><select id="country"></select></div>
+          <div class="field"><label for="template">Šablóna projektu</label><select id="template"></select></div>
+          <div class="field"><label for="erieiScore">ERIEI skóre 0–100</label><input type="number" id="erieiScore" step="1" min="0" max="100"></div>
+          <div class="field"><label for="erieiAdj">ERIEI úprava diskontu, p. b.</label><input type="number" id="erieiAdj" step="0.1"></div>
+          <div class="field"><label for="countryPremium">Riziková prémia krajiny, %</label><input type="number" id="countryPremium" step="0.1"></div>
+          <div class="field"><label for="inflation">Inflácia, %</label><input type="number" id="inflation" step="0.1"></div>
+          <div class="field"><label for="taxRate">Daňová sadzba, %</label><input type="number" id="taxRate" step="0.1"></div>
+          <div class="field"><label for="importDependence">Materiálová dovozná závislosť, %</label><input type="number" id="importDependence" step="0.1"></div>
+          <div class="field"><label for="resourceProductivity">Produktivita zdrojov</label><input type="number" id="resourceProductivity" step="0.01"></div>
+          <div class="field"><label for="securityIndex">Index surovinovej bezpečnosti 0–100</label><input type="number" id="securityIndex" step="1" min="0" max="100"></div>
+        </div>
+      </div>
+      <div class="card soft">
+        <div class="section-title" style="margin-top:0"><div><h2>ERIEI investičné prostredie krajiny</h2><p>Metodická interpretácia krajinného rizika, surovinovej bezpečnosti a produktivity zdrojov.</p></div></div>
+        <div class="kpis" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:0">
+          <div class="kpi"><div class="name">Trieda ERIEI</div><div class="value" id="erieiClass">–</div><div class="note">Investičná efektívnosť krajiny</div></div>
+          <div class="kpi"><div class="name">Efektívny diskont</div><div class="value" id="effectiveDiscountBox">–</div><div class="note">vrátane krajiny a ERIEI</div></div>
+        </div>
+        <div id="countryComments" class="interpretation" style="font-size:14px;min-height:170px"></div>
+      </div>
+    </section>
+
+    <div class="section-title"><div><h2>2. Vstupné údaje projektu</h2><p>Projektový model zohľadňuje investície, prevádzku, dane, infláciu, degradáciu produkcie, financovanie, rekultiváciu a povoľovacie oneskorenie.</p></div></div>
+    <section class="card">
+      <div class="grid grid-4">
+        <div class="field"><label for="projectName">Názov projektu</label><input id="projectName" type="text"></div>
+        <div class="field"><label for="currency">Mena</label><select id="currency"><option>EUR</option><option>CZK</option><option>PLN</option><option>USD</option></select></div>
+        <div class="field"><label for="startYear">Začiatok projektu</label><input id="startYear" type="number" step="1"></div>
+        <div class="field"><label for="projectLife">Životnosť projektu, roky</label><input id="projectLife" type="number" step="1" min="1"></div>
+        <div class="field"><label for="horizon">Analyzovaný horizont, roky</label><input id="horizon" type="number" step="1" min="1"></div>
+        <div class="field"><label for="delay">Povoľovacie oneskorenie, roky</label><input id="delay" type="number" step="1" min="0"></div>
+        <div class="field"><label for="capex">CAPEX</label><input id="capex" type="number" step="1000"></div>
+        <div class="field"><label for="subsidy">Dotácia / podpora</label><input id="subsidy" type="number" step="1000"></div>
+        <div class="field"><label for="residual">Zostatková hodnota</label><input id="residual" type="number" step="1000"></div>
+        <div class="field"><label for="rehab">Rekultivačné náklady</label><input id="rehab" type="number" step="1000"></div>
+        <div class="field"><label for="annualProd">Ročná produkcia, t</label><input id="annualProd" type="number" step="100"></div>
+        <div class="field"><label for="price">Predajná cena, EUR/t</label><input id="price" type="number" step="0.1"></div>
+        <div class="field"><label for="priceGrowth">Rast ceny suroviny, %</label><input id="priceGrowth" type="number" step="0.1"></div>
+        <div class="field"><label for="annualOpex">Ročné OPEX</label><input id="annualOpex" type="number" step="1000"></div>
+        <div class="field"><label for="opexGrowth">Rast OPEX, %</label><input id="opexGrowth" type="number" step="0.1"></div>
+        <div class="field"><label for="fixedCosts">Fixné náklady</label><input id="fixedCosts" type="number" step="1000"></div>
+        <div class="field"><label for="variableCost">Variabilné náklady, EUR/t</label><input id="variableCost" type="number" step="0.1"></div>
+        <div class="field"><label for="degradation">Pokles produkcie, % ročne</label><input id="degradation" type="number" step="0.1"></div>
+        <div class="field"><label for="capacity">Kapacitné využitie, %</label><input id="capacity" type="number" step="1" min="0" max="120"></div>
+        <div class="field"><label for="discountRate">Základná diskontná sadzba, %</label><input id="discountRate" type="number" step="0.1"></div>
+        <div class="field"><label for="useEriei">Použiť ERIEI úpravu?</label><select id="useEriei"><option value="yes">Áno</option><option value="no">Nie</option></select></div>
+        <div class="field"><label for="debtShare">Podiel dlhu, %</label><input id="debtShare" type="number" step="1" min="0" max="100"></div>
+        <div class="field"><label for="interestRate">Úroková sadzba úveru, %</label><input id="interestRate" type="number" step="0.1"></div>
+        <div class="field"><label for="loanTerm">Splatnosť úveru, roky</label><input id="loanTerm" type="number" step="1" min="1"></div>
+        <div class="field"><label for="minIrr">Požadovaná minimálna IRR, %</label><input id="minIrr" type="number" step="0.1"></div>
+        <div class="field"><label for="depreciationYears">Odpisovanie, roky</label><input id="depreciationYears" type="number" step="1" min="1"></div>
+        <div class="field"><label for="mcIterations">Počet Monte Carlo simulácií</label><select id="mcIterations"><option value="1000">1 000</option><option value="2000">2 000</option><option value="3000">3 000</option><option value="4000">4 000</option><option value="5000" selected>5 000</option><option value="6000">6 000</option><option value="7000">7 000</option><option value="8000">8 000</option><option value="9000">9 000</option><option value="10000">10 000</option></select><div class="hint">Výber od 1 000 do 10 000 simulácií.</div></div>
+      </div>
+    </section>
+
+    <div class="section-title"><div><h2>3. Výsledkové KPI</h2><p>Ekonomické ukazovatele pre základný scenár projektu.</p></div></div>
+    <section class="kpis" id="kpiGrid"></section>
+
+    <div class="section-title"><div><h2>4. Grafy cash-flow, NPV a vzťahov vstupov</h2></div></div>
+    <section class="grid grid-2">
+      <div class="card chart-card"><canvas id="cfBarChart"></canvas></div>
+      <div class="card chart-card"><canvas id="cumLineChart"></canvas></div>
+      <div class="card chart-card"><canvas id="npvTimeChart"></canvas></div>
+      <div class="card chart-card"><canvas id="scenarioChart"></canvas></div>
+      <div class="card chart-card"><canvas id="capexScatterChart"></canvas></div>
+      <div class="card chart-card"><canvas id="priceIrrScatterChart"></canvas></div>
+    </section>
+
+    <div class="section-title"><div><h2>5. Scenárová analýza</h2><p>Pesimistický, základný a optimistický scenár s odporúčaním.</p></div></div>
+    <section class="card table-wrap"><table id="scenarioTable"></table></section>
+
+    <div class="section-title"><div><h2>6. Matica citlivosti NPV a IRR</h2><p>Vyber dve premenné a sleduj kombinovaný vplyv zmien od -30 % do +30 %.</p></div></div>
+    <section class="card">
+      <div class="grid grid-3">
+        <div class="field"><label for="sensX">Premenná v riadkoch</label><select id="sensX"></select></div>
+        <div class="field"><label for="sensY">Premenná v stĺpcoch</label><select id="sensY"></select></div>
+        <div class="field" style="align-self:end"><button class="gold" id="btnSensitivity">Prepočítať matice</button></div>
+      </div>
+      <div class="grid grid-2" style="margin-top:18px">
+        <div class="matrix"><h3>Matica NPV, mil. EUR</h3><div class="table-wrap"><table id="npvMatrix"></table></div></div>
+        <div class="matrix"><h3>Matica IRR, %</h3><div class="table-wrap"><table id="irrMatrix"></table></div></div>
+      </div>
+    </section>
+
+    <div class="section-title"><div><h2>7. Ročný cash-flow a ekonomické ukazovatele</h2></div></div>
+    <section class="card table-wrap"><table id="cashFlowTable"></table></section>
+
+    <div class="section-title"><div><h2>8. Monte Carlo simulácia a rizikové intervaly</h2><p>Simulácia náhodne mení CAPEX, OPEX, cenu, produkciu, rast, infláciu, diskont, daň, rekultiváciu, povoľovacie oneskorenie a ERIEI úpravu.</p></div></div>
+    <section class="kpis" id="mcKpiGrid"></section>
+    <section class="grid grid-2">
+      <div class="card chart-card"><canvas id="mcHistChart"></canvas></div>
+      <div class="card chart-card"><canvas id="mcCdfChart"></canvas></div>
+      <div class="card chart-card"><canvas id="mcCfIntervalChart"></canvas></div>
+      <div class="card chart-card"><canvas id="mcTornadoChart"></canvas></div>
+    </section>
+    <section class="card table-wrap" style="margin-top:18px"><table id="mcSummaryTable"></table></section>
+
+    <div class="section-title"><div><h2>9. Odborná interpretácia výsledkov</h2><p>Výstup je formulovaný vecne a akademicky pre ekonomickú alebo investičnú správu.</p></div></div>
+    <section class="interpretation" id="interpretation"></section>
+
+    <p class="footer-note">Ukážkový teoretický analytický nástroj pracuje s ilustračnými prednastaveniami krajín a projektov. Výpočty slúžia na akademické hodnotenie investičnej efektívnosti a nenahrádzajú právne, účtovné, znalecké ani investičné poradenstvo.</p>
+  </main>
+
+<script>
+'use strict';
+
+const EU_COUNTRIES = {
+  "Belgicko": {discount:8.0,inflation:2.2,tax:25.0,premium:0.7,importDep:62,resourceProd:2.85,security:66,eriei:69},
+  "Bulharsko": {discount:10.8,inflation:3.5,tax:10.0,premium:2.0,importDep:41,resourceProd:0.92,security:52,eriei:48},
+  "Česko": {discount:8.7,inflation:2.8,tax:21.0,premium:1.0,importDep:39,resourceProd:1.63,security:64,eriei:63},
+  "Dánsko": {discount:7.2,inflation:2.1,tax:22.0,premium:0.3,importDep:58,resourceProd:3.18,security:78,eriei:78},
+  "Nemecko": {discount:7.8,inflation:2.2,tax:29.0,premium:0.5,importDep:61,resourceProd:2.72,security:74,eriei:74},
+  "Estónsko": {discount:9.4,inflation:3.0,tax:20.0,premium:1.3,importDep:47,resourceProd:1.72,security:62,eriei:61},
+  "Írsko": {discount:7.9,inflation:2.4,tax:12.5,premium:0.7,importDep:68,resourceProd:3.65,security:70,eriei:72},
+  "Grécko": {discount:10.2,inflation:2.9,tax:22.0,premium:1.8,importDep:55,resourceProd:1.55,security:55,eriei:53},
+  "Španielsko": {discount:8.6,inflation:2.5,tax:25.0,premium:1.0,importDep:57,resourceProd:2.12,security:64,eriei:64},
+  "Francúzsko": {discount:8.0,inflation:2.2,tax:25.8,premium:0.7,importDep:60,resourceProd:2.55,security:70,eriei:70},
+  "Chorvátsko": {discount:9.5,inflation:2.8,tax:18.0,premium:1.5,importDep:43,resourceProd:1.45,security:57,eriei:56},
+  "Taliansko": {discount:9.0,inflation:2.5,tax:27.9,premium:1.2,importDep:64,resourceProd:2.42,security:62,eriei:62},
+  "Cyprus": {discount:9.2,inflation:2.6,tax:12.5,premium:1.5,importDep:72,resourceProd:1.80,security:54,eriei:55},
+  "Lotyšsko": {discount:9.8,inflation:3.1,tax:20.0,premium:1.6,importDep:46,resourceProd:1.38,security:56,eriei:55},
+  "Litva": {discount:9.5,inflation:3.0,tax:15.0,premium:1.4,importDep:48,resourceProd:1.52,security:58,eriei:58},
+  "Luxembursko": {discount:7.0,inflation:2.1,tax:24.9,premium:0.2,importDep:83,resourceProd:4.10,security:72,eriei:76},
+  "Maďarsko": {discount:10.0,inflation:3.2,tax:9.0,premium:1.7,importDep:52,resourceProd:1.49,security:55,eriei:54},
+  "Malta": {discount:9.1,inflation:2.7,tax:35.0,premium:1.4,importDep:88,resourceProd:2.25,security:50,eriei:52},
+  "Holandsko": {discount:7.5,inflation:2.2,tax:25.8,premium:0.4,importDep:73,resourceProd:3.25,security:73,eriei:75},
+  "Rakúsko": {discount:7.7,inflation:2.3,tax:23.0,premium:0.5,importDep:49,resourceProd:2.70,security:73,eriei:73},
+  "Poľsko": {discount:9.2,inflation:3.0,tax:19.0,premium:1.2,importDep:36,resourceProd:1.38,security:63,eriei:61},
+  "Portugalsko": {discount:8.8,inflation:2.5,tax:21.0,premium:1.1,importDep:54,resourceProd:1.70,security:59,eriei:58},
+  "Rumunsko": {discount:10.3,inflation:3.4,tax:16.0,premium:1.9,importDep:32,resourceProd:1.08,security:55,eriei:52},
+  "Slovinsko": {discount:8.5,inflation:2.6,tax:19.0,premium:0.9,importDep:50,resourceProd:1.95,security:64,eriei:63},
+  "Slovensko": {discount:8.9,inflation:2.8,tax:21.0,premium:1.1,importDep:46,resourceProd:1.58,security:61,eriei:60},
+  "Fínsko": {discount:7.6,inflation:2.3,tax:20.0,premium:0.5,importDep:37,resourceProd:2.28,security:78,eriei:76},
+  "Švédsko": {discount:7.4,inflation:2.2,tax:20.6,premium:0.4,importDep:34,resourceProd:2.62,security:82,eriei:80}
+};
+
+function erieiAdjustment(score){
+  if(score>=75) return -1.0;
+  if(score>=60) return -0.5;
+  if(score>=45) return 0.0;
+  if(score>=30) return 1.0;
+  return 2.0;
+}
+function erieiClass(score){
+  if(score>=75) return "veľmi vysoká efektívnosť";
+  if(score>=60) return "vysoká efektívnosť";
+  if(score>=45) return "stredná efektívnosť";
+  if(score>=30) return "nízka efektívnosť";
+  return "veľmi nízka efektívnosť";
+}
+
+const PROJECT_TEMPLATES = {
+  "Ťažobný projekt – základný scenár": {name:"Ťažobný projekt zemských zdrojov", life:18,horizon:22,delay:2,capex:120000000,subsidy:0,residual:12000000,rehab:18000000,prod:450000,price:145,priceGrowth:1.5,annualOpex:8500000,opexGrowth:2.5,fixedCosts:4500000,variableCost:62,degradation:1.0,capacity:92,discount:8.5,debt:45,interest:5.2,loanTerm:10,minIrr:11,depr:12},
+  "Projekt spracovania surovín": {name:"Projekt spracovania a zhodnotenia surovín", life:16,horizon:20,delay:1,capex:85000000,subsidy:5000000,residual:15000000,rehab:8000000,prod:260000,price:310,priceGrowth:1.2,annualOpex:13500000,opexGrowth:2.4,fixedCosts:7200000,variableCost:96,degradation:0.4,capacity:88,discount:8.0,debt:50,interest:4.8,loanTerm:9,minIrr:10,depr:10},
+  "Projekt zvýšenia surovinovej sebestačnosti": {name:"Projekt zvýšenia surovinovej sebestačnosti", life:20,horizon:24,delay:2,capex:105000000,subsidy:12000000,residual:10000000,rehab:14000000,prod:380000,price:160,priceGrowth:1.0,annualOpex:9200000,opexGrowth:2.2,fixedCosts:5200000,variableCost:58,degradation:0.7,capacity:90,discount:8.2,debt:40,interest:4.9,loanTerm:12,minIrr:10.5,depr:12},
+  "Projekt kritických surovín": {name:"Projekt kritických surovín", life:15,horizon:20,delay:3,capex:185000000,subsidy:10000000,residual:22000000,rehab:26000000,prod:120000,price:680,priceGrowth:2.6,annualOpex:16500000,opexGrowth:3.2,fixedCosts:8500000,variableCost:180,degradation:1.4,capacity:84,discount:10.0,debt:55,interest:6.2,loanTerm:10,minIrr:14,depr:10},
+  "Všeobecný investičný projekt v sektore zemských zdrojov": {name:"Všeobecný projekt zemských zdrojov", life:15,horizon:20,delay:1,capex:70000000,subsidy:0,residual:7000000,rehab:6000000,prod:220000,price:180,priceGrowth:1.5,annualOpex:7000000,opexGrowth:2.2,fixedCosts:3500000,variableCost:70,degradation:0.8,capacity:90,discount:8.5,debt:40,interest:5.0,loanTerm:8,minIrr:11,depr:10}
+};
+
+const SENS_VARS = [
+  {key:'capex', label:'CAPEX'},
+  {key:'annualOpex', label:'Ročné OPEX'},
+  {key:'price', label:'Cena suroviny'},
+  {key:'annualProd', label:'Ročná produkcia'},
+  {key:'discountRate', label:'Diskontná sadzba'},
+  {key:'priceGrowth', label:'Rast ceny'},
+  {key:'inflation', label:'Inflácia'},
+  {key:'projectLife', label:'Životnosť projektu'},
+  {key:'rehab', label:'Rekultivačné náklady'},
+  {key:'erieiAdj', label:'ERIEI úprava diskontu'},
+  {key:'variableCost', label:'Variabilné náklady'}
+];
+
+let charts = {};
+let currentResult = null;
+let currentScenarios = [];
+let currentMC = null;
+let currentSensitivity = null;
+
+const $ = id => document.getElementById(id);
+const num = id => Number($(id).value) || 0;
+const pct = id => num(id)/100;
+const fmt = (v,d=1)=> Number.isFinite(v) ? v.toLocaleString('sk-SK',{maximumFractionDigits:d,minimumFractionDigits:d}) : '–';
+const fmt0 = v => Number.isFinite(v) ? v.toLocaleString('sk-SK',{maximumFractionDigits:0}) : '–';
+const fmtPct = (v,d=1)=> Number.isFinite(v) ? (v*100).toLocaleString('sk-SK',{maximumFractionDigits:d,minimumFractionDigits:d})+' %' : '–';
+const clamp = (v,min,max)=> Math.max(min,Math.min(max,v));
+
+function init(){
+  Object.keys(EU_COUNTRIES).forEach(c => $('country').insertAdjacentHTML('beforeend', `<option>${c}</option>`));
+  Object.keys(PROJECT_TEMPLATES).forEach(t => $('template').insertAdjacentHTML('beforeend', `<option>${t}</option>`));
+  SENS_VARS.forEach(v => {
+    $('sensX').insertAdjacentHTML('beforeend', `<option value="${v.key}">${v.label}</option>`);
+    $('sensY').insertAdjacentHTML('beforeend', `<option value="${v.key}">${v.label}</option>`);
+  });
+  $('country').value = 'Slovensko';
+  $('template').value = 'Ťažobný projekt – základný scenár';
+  $('sensX').value = 'capex';
+  $('sensY').value = 'price';
+  applyCountryDefaults();
+  applyTemplate();
+  bindEvents();
+  recalculateAll();
+}
+
+function bindEvents(){
+  $('country').addEventListener('change',()=>{applyCountryDefaults(); recalculateAll();});
+  $('template').addEventListener('change',()=>{applyTemplate(); recalculateAll();});
+  $('btnCalc').addEventListener('click', recalculateAll);
+  $('btnSensitivity').addEventListener('click', recalculateSensitivity);
+  $('btnRunMC').addEventListener('click', runMonteCarlo);
+  $('btnReset').addEventListener('click',()=>{applyCountryDefaults();applyTemplate();recalculateAll();});
+  $('btnPrint').addEventListener('click',()=>window.print());
+  $('btnExportResults').addEventListener('click',()=>downloadCSV('vysledky_projektu.csv', resultRows()));
+  $('btnExportCF').addEventListener('click',()=>downloadCSV('cash_flow.csv', currentResult ? currentResult.cashFlows : []));
+  $('btnExportMC').addEventListener('click',()=>downloadCSV('monte_carlo_vysledky.csv', currentMC ? currentMC.results : []));
+  $('btnCopyInterpretation').addEventListener('click',()=>navigator.clipboard.writeText($('interpretation').innerText || ''));
+}
+
+function applyCountryDefaults(){
+  const c = EU_COUNTRIES[$('country').value];
+  $('erieiScore').value = c.eriei;
+  $('erieiAdj').value = erieiAdjustment(c.eriei).toFixed(1);
+  $('countryPremium').value = c.premium;
+  $('inflation').value = c.inflation;
+  $('taxRate').value = c.tax;
+  $('importDependence').value = c.importDep;
+  $('resourceProductivity').value = c.resourceProd;
+  $('securityIndex').value = c.security;
+}
+
+function applyTemplate(){
+  const t = PROJECT_TEMPLATES[$('template').value];
+  $('projectName').value = t.name;
+  $('currency').value = 'EUR';
+  $('startYear').value = new Date().getFullYear();
+  $('projectLife').value = t.life;
+  $('horizon').value = t.horizon;
+  $('delay').value = t.delay;
+  $('capex').value = t.capex;
+  $('subsidy').value = t.subsidy;
+  $('residual').value = t.residual;
+  $('rehab').value = t.rehab;
+  $('annualProd').value = t.prod;
+  $('price').value = t.price;
+  $('priceGrowth').value = t.priceGrowth;
+  $('annualOpex').value = t.annualOpex;
+  $('opexGrowth').value = t.opexGrowth;
+  $('fixedCosts').value = t.fixedCosts;
+  $('variableCost').value = t.variableCost;
+  $('degradation').value = t.degradation;
+  $('capacity').value = t.capacity;
+  $('discountRate').value = t.discount;
+  $('useEriei').value = 'yes';
+  $('debtShare').value = t.debt;
+  $('interestRate').value = t.interest;
+  $('loanTerm').value = t.loanTerm;
+  $('minIrr').value = t.minIrr;
+  $('depreciationYears').value = t.depr;
+}
+
+function getParams(){
+  const eriei = clamp(num('erieiScore'),0,100);
+  return {
+    projectName: $('projectName').value || 'Projekt zemských zdrojov',
+    country: $('country').value,
+    template: $('template').value,
+    currency: $('currency').value,
+    startYear: Math.round(num('startYear') || new Date().getFullYear()),
+    projectLife: Math.max(1, Math.round(num('projectLife'))),
+    horizon: Math.max(1, Math.round(num('horizon'))),
+    delay: Math.max(0, Math.round(num('delay'))),
+    capex: Math.max(0,num('capex')),
+    subsidy: Math.max(0,num('subsidy')),
+    residual: Math.max(0,num('residual')),
+    rehab: Math.max(0,num('rehab')),
+    annualProd: Math.max(0,num('annualProd')),
+    price: Math.max(0,num('price')),
+    priceGrowth: pct('priceGrowth'),
+    annualOpex: Math.max(0,num('annualOpex')),
+    opexGrowth: pct('opexGrowth'),
+    fixedCosts: Math.max(0,num('fixedCosts')),
+    variableCost: Math.max(0,num('variableCost')),
+    degradation: clamp(pct('degradation'),0,0.25),
+    capacity: clamp(pct('capacity'),0,1.2),
+    discountRate: Math.max(0,pct('discountRate')),
+    useEriei: $('useEriei').value === 'yes',
+    erieiScore: eriei,
+    erieiAdj: num('erieiAdj')/100,
+    countryPremium: num('countryPremium')/100,
+    inflation: pct('inflation'),
+    taxRate: clamp(pct('taxRate'),0,0.65),
+    importDependence: clamp(num('importDependence'),0,100),
+    resourceProductivity: Math.max(0,num('resourceProductivity')),
+    securityIndex: clamp(num('securityIndex'),0,100),
+    debtShare: clamp(pct('debtShare'),0,1),
+    interestRate: Math.max(0,pct('interestRate')),
+    loanTerm: Math.max(1,Math.round(num('loanTerm'))),
+    minIrr: pct('minIrr'),
+    depreciationYears: Math.max(1,Math.round(num('depreciationYears')))
+  };
+}
+
+function effectiveDiscount(p){
+  return Math.max(0.001, p.discountRate + p.countryPremium + (p.useEriei ? p.erieiAdj : 0));
+}
+
+function annuityPayment(principal, rate, n){
+  if(principal<=0 || n<=0) return 0;
+  if(rate===0) return principal/n;
+  return principal * rate / (1 - Math.pow(1+rate,-n));
+}
+
+function buildCashFlows(p){
+  const horizon = Math.max(p.horizon, p.delay + p.projectLife);
+  const netInitialInvestment = Math.max(0, p.capex - p.subsidy);
+  const debtPrincipal = netInitialInvestment * p.debtShare;
+  const annuity = annuityPayment(debtPrincipal, p.interestRate, p.loanTerm);
+  let debtBalance = debtPrincipal;
+  const disc = effectiveDiscount(p);
+  const rows = [];
+  const depreciation = p.capex / p.depreciationYears;
+  let cumulative = 0;
+  let cumulativeDiscounted = 0;
+  for(let y=0;y<=horizon;y++){
+    const calendarYear = p.startYear + y;
+    const opYear = y - p.delay;
+    const operating = opYear>=1 && opYear<=p.projectLife;
+    const production = operating ? p.annualProd * p.capacity * Math.pow(1-p.degradation, opYear-1) : 0;
+    const price = operating ? p.price * Math.pow(1 + p.priceGrowth + p.inflation, opYear-1) : 0;
+    const revenue = production * price;
+    const variableOpex = operating ? production * p.variableCost * Math.pow(1+p.opexGrowth+p.inflation, opYear-1) : 0;
+    const annualOpex = operating ? p.annualOpex * Math.pow(1+p.opexGrowth+p.inflation, opYear-1) : 0;
+    const fixedCosts = operating ? p.fixedCosts * Math.pow(1+p.inflation, opYear-1) : 0;
+    const totalOpex = annualOpex + fixedCosts + variableOpex;
+    const ebitda = revenue - totalOpex;
+    const depr = operating && opYear<=p.depreciationYears ? depreciation : 0;
+    let interest = 0, principal = 0, debtService = 0;
+    if(y>=1 && y<=p.loanTerm && debtBalance>1){
+      interest = debtBalance * p.interestRate;
+      principal = Math.min(debtBalance, annuity - interest);
+      principal = Math.max(0, principal);
+      debtService = interest + principal;
+      debtBalance = Math.max(0, debtBalance - principal);
+    }
+    const ebit = ebitda - depr - interest;
+    const tax = Math.max(0, ebit * p.taxRate);
+    const netProfit = ebit - tax;
+    const capexOut = y===0 ? netInitialInvestment : 0;
+    const residualIn = y===horizon ? p.residual : 0;
+    const rehabOut = y===horizon ? p.rehab * Math.pow(1+p.inflation, horizon) : 0;
+    const freeCashFlow = ebitda - tax - capexOut + residualIn - rehabOut;
+    const equityCashFlow = freeCashFlow + (y===0 ? debtPrincipal : 0) - debtService;
+    const discountedCashFlow = freeCashFlow / Math.pow(1+disc, y);
+    cumulative += freeCashFlow;
+    cumulativeDiscounted += discountedCashFlow;
+    rows.push({
+      year:y, calendarYear, operating, production, price, revenue, totalOpex, ebitda, depreciation:depr,
+      interest, principal, debtService, ebit, tax, netProfit, freeCashFlow, equityCashFlow,
+      discountedCashFlow, cumulativeCashFlow:cumulative, cumulativeDiscountedCashFlow:cumulativeDiscounted,
+      dscr: debtService>0 ? Math.max(0,(ebitda-tax)/debtService) : null
+    });
+  }
+  const fcf = rows.map(r=>r.freeCashFlow);
+  const npv = sum(rows.map(r=>r.discountedCashFlow));
+  const irr = calculateIRR(fcf);
+  const payback = firstYear(rows, 'cumulativeCashFlow');
+  const discountedPayback = firstYear(rows, 'cumulativeDiscountedCashFlow');
+  const futurePV = sum(rows.filter(r=>r.year>0).map(r=>r.discountedCashFlow));
+  const totalRevenue = sum(rows.map(r=>r.revenue));
+  const totalOpex = sum(rows.map(r=>r.totalOpex));
+  const totalCosts = totalOpex + netInitialInvestment + p.rehab;
+  const netBenefit = totalRevenue + p.residual - totalCosts;
+  const roi = netInitialInvestment>0 ? netBenefit / netInitialInvestment : null;
+  const pi = netInitialInvestment>0 ? futurePV / netInitialInvestment : null;
+  const minDscr = Math.min(...rows.map(r=>r.dscr).filter(v=>v!==null && isFinite(v)));
+  const breakEvenYear = payback;
+  return {params:p, cashFlows:rows, discount:disc, npv, irr, payback, discountedPayback, roi, pi, breakEvenYear, minDscr:isFinite(minDscr)?minDscr:null, totalRevenue,totalOpex,totalCosts,netBenefit};
+}
+function sum(arr){return arr.reduce((a,b)=>a+(Number.isFinite(b)?b:0),0)}
+function firstYear(rows,key){const r=rows.find(x=>x[key]>=0 && x.year>0);return r ? r.year : null}
+
+function npvFromRate(cashFlows, rate){return cashFlows.reduce((acc,cf,i)=>acc + cf/Math.pow(1+rate,i),0)}
+function calculateIRR(cashFlows){
+  const hasPos = cashFlows.some(v=>v>0), hasNeg = cashFlows.some(v=>v<0);
+  if(!hasPos || !hasNeg) return null;
+  const min=-0.95, max=3.0, steps=400;
+  let prevR=min, prevV=npvFromRate(cashFlows, prevR);
+  for(let i=1;i<=steps;i++){
+    const r = min + (max-min)*i/steps;
+    const v = npvFromRate(cashFlows, r);
+    if(!isFinite(v) || !isFinite(prevV)){prevR=r;prevV=v;continue;}
+    if(v===0) return r;
+    if(prevV*v<0){
+      let lo=prevR, hi=r, mid=0;
+      for(let j=0;j<80;j++){
+        mid=(lo+hi)/2;
+        const mv=npvFromRate(cashFlows, mid);
+        if(Math.abs(mv)<1e-7) return mid;
+        if(npvFromRate(cashFlows, lo)*mv<=0) hi=mid; else lo=mid;
+      }
+      return mid;
+    }
+    prevR=r; prevV=v;
+  }
+  return null;
+}
+
+function scenarioParams(base, name){
+  const p = structuredClone(base);
+  if(name==='Pesimistický'){
+    p.capex *= 1.18; p.annualOpex *= 1.16; p.fixedCosts *= 1.12; p.variableCost *= 1.16;
+    p.annualProd *= 0.88; p.price *= 0.82; p.discountRate += 0.025; p.delay += 2; p.rehab *= 1.20;
+  } else if(name==='Optimistický'){
+    p.capex *= 0.94; p.annualOpex *= 0.92; p.fixedCosts *= 0.92; p.variableCost *= 0.92;
+    p.annualProd *= 1.08; p.price *= 1.18; p.discountRate = Math.max(0.005,p.discountRate-0.015); p.delay = Math.max(0,p.delay-1); p.rehab *= 0.90;
+  }
+  return p;
+}
+
+function recalculateAll(){
+  const p = getParams();
+  currentResult = buildCashFlows(p);
+  currentScenarios = ['Pesimistický','Základný','Optimistický'].map(s=>({scenario:s, result:buildCashFlows(scenarioParams(p,s))}));
+  updateCountryBox(p, currentResult);
+  updateKpis(currentResult);
+  updateTables(currentResult, currentScenarios);
+  updateCoreCharts(currentResult, currentScenarios);
+  recalculateSensitivity();
+  updateInterpretation();
+}
+
+function updateCountryBox(p, result){
+  $('erieiClass').textContent = erieiClass(p.erieiScore);
+  $('effectiveDiscountBox').textContent = fmtPct(result.discount,1);
+  const dep = p.importDependence>=65 ? 'vysoká' : p.importDependence>=45 ? 'stredná' : 'nižšia';
+  const prod = p.resourceProductivity>=2.5 ? 'vysoká' : p.resourceProductivity>=1.5 ? 'stredná' : 'nižšia';
+  const sec = p.securityIndex>=70 ? 'silnú' : p.securityIndex>=55 ? 'strednú' : 'slabšiu';
+  $('countryComments').innerHTML = `Ilustračné prednastavenia pre krajinu <b>${p.country}</b>. ERIEI skóre ${fmt(p.erieiScore,0)} znamená triedu <b>${erieiClass(p.erieiScore)}</b>. Odporúčaná úprava diskontnej sadzby podľa ERIEI je <b>${fmt(p.erieiAdj*100,1)} p. b.</b>\n\nKrajina má ${dep} materiálovú dovoznú závislosť (${fmt(p.importDependence,1)} %), ${prod} produktivitu zdrojov (${fmt(p.resourceProductivity,2)}) a ${sec} surovinovú bezpečnosť. Efektívny diskont projektu je ${fmtPct(result.discount,1)}.`;
+}
+
+function updateKpis(r){
+  const items = [
+    ['NPV', fmt(r.npv/1e6,1)+' mil. '+r.params.currency, r.npv>=0?'good':'bad'],
+    ['IRR', r.irr!==null?fmtPct(r.irr,1):'–', r.irr!==null && r.irr>r.discount?'good':'bad'],
+    ['Payback', r.payback!==null?fmt(r.payback,1)+' roka':'bez návratnosti', r.payback!==null?'good':'bad'],
+    ['Diskontovaný payback', r.discountedPayback!==null?fmt(r.discountedPayback,1)+' roka':'bez návratnosti', r.discountedPayback!==null?'good':'bad'],
+    ['ROI', r.roi!==null?fmtPct(r.roi,1):'–', r.roi>0?'good':'bad'],
+    ['PI', r.pi!==null?fmt(r.pi,2):'–', r.pi>=1?'good':'bad'],
+    ['Break-even', r.breakEvenYear!==null?'rok '+r.breakEvenYear:'nedosiahnutý', r.breakEvenYear!==null?'good':'bad'],
+    ['Min. DSCR', r.minDscr!==null?fmt(r.minDscr,2):'bez dlhu', r.minDscr===null || r.minDscr>=1.2?'good':r.minDscr>=1?'warn':'bad'],
+    ['Tržby spolu', fmt(r.totalRevenue/1e6,1)+' mil.', 'good'],
+    ['Náklady spolu', fmt(r.totalCosts/1e6,1)+' mil.', 'warn'],
+    ['Čistý prínos', fmt(r.netBenefit/1e6,1)+' mil.', r.netBenefit>=0?'good':'bad'],
+    ['Efektívny diskont', fmtPct(r.discount,1), 'warn']
+  ];
+  $('kpiGrid').innerHTML = items.map(([n,v,c])=>`<div class="kpi"><div class="name">${n}</div><div class="value">${v}</div><div class="note"><span class="pill ${c}">${c==='good'?'priaznivé':c==='warn'?'hraničné':'nepriaznivé'}</span></div></div>`).join('');
+}
+
+function table(headers, rows){
+  return `<thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody>`;
+}
+
+function updateTables(r, scenarios){
+  const cfRows = r.cashFlows.map(x=>[
+    x.calendarYear, x.year, x.operating?'áno':'nie', fmt0(x.production), fmt(x.price,2), fmt(x.revenue/1e6,2), fmt(x.totalOpex/1e6,2), fmt(x.ebitda/1e6,2), fmt(x.tax/1e6,2), fmt(x.freeCashFlow/1e6,2), fmt(x.discountedCashFlow/1e6,2), fmt(x.cumulativeCashFlow/1e6,2), fmt(x.cumulativeDiscountedCashFlow/1e6,2), x.dscr===null?'–':fmt(x.dscr,2)
+  ]);
+  $('cashFlowTable').innerHTML = table(['Rok','t','Prevádzka','Produkcia t','Cena','Tržby mil.','OPEX mil.','EBITDA mil.','Daň mil.','FCF mil.','DCF mil.','Kumul. FCF','Kumul. DCF','DSCR'], cfRows);
+  const scRows = scenarios.map(s=>{
+    const res=s.result;
+    const ok = res.npv>0 && res.irr!==null && res.irr>res.discount;
+    return [s.scenario, fmt(res.npv/1e6,2), res.irr!==null?fmtPct(res.irr,1):'–', res.payback!==null?fmt(res.payback,1):'–', res.discountedPayback!==null?fmt(res.discountedPayback,1):'–', res.roi!==null?fmtPct(res.roi,1):'–', res.pi!==null?fmt(res.pi,2):'–', ok?'Projekt je ekonomicky prijateľný':'Projekt je rizikový alebo neprijateľný'];
+  });
+  $('scenarioTable').innerHTML = table(['Scenár','NPV mil. EUR','IRR','Payback','Diskont. payback','ROI','PI','Odporúčanie'], scRows);
+}
+
+function chart(id, type, data, options){
+  if(charts[id]) charts[id].destroy();
+  const ctx=$(id).getContext('2d');
+  charts[id]=new Chart(ctx,{type,data,options});
+}
+const gold = '#d6a84f', goldDark='#8c6a24', goldSoft='#f4d98b', black='#111111', red='#c84b4b', green='#228b57', grey='#626262';
+const defaultOptions = (title)=>({responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'},title:{display:true,text:title,color:black,font:{weight:'bold',size:16}}},scales:{x:{grid:{color:'#eee7d8'}},y:{grid:{color:'#eee7d8'}}}});
+
+function updateCoreCharts(r, scenarios){
+  const labels = r.cashFlows.map(x=>String(x.calendarYear));
+  chart('cfBarChart','bar',{labels,datasets:[{label:'Ročný FCF',data:r.cashFlows.map(x=>x.freeCashFlow/1e6),backgroundColor:gold,borderColor:black,borderWidth:1},{label:'Diskontovaný FCF',data:r.cashFlows.map(x=>x.discountedCashFlow/1e6),backgroundColor:grey,borderColor:black,borderWidth:1}]}, defaultOptions('Stĺpcový graf ročných cash-flow'));
+  chart('cumLineChart','line',{labels,datasets:[{label:'Kumulatívny FCF',data:r.cashFlows.map(x=>x.cumulativeCashFlow/1e6),borderColor:goldDark,backgroundColor:goldDark,tension:.25},{label:'Kumulatívny DCF',data:r.cashFlows.map(x=>x.cumulativeDiscountedCashFlow/1e6),borderColor:black,backgroundColor:black,tension:.25}]}, defaultOptions('Čiarový graf kumulatívneho cash-flow'));
+  chart('npvTimeChart','line',{labels,datasets:[{label:'NPV v čase',data:r.cashFlows.map(x=>x.cumulativeDiscountedCashFlow/1e6),borderColor:black,backgroundColor:goldSoft,fill:true,tension:.25}]}, defaultOptions('Čiarový graf NPV v čase'));
+  chart('scenarioChart','bar',{labels:scenarios.map(s=>s.scenario),datasets:[{label:'NPV mil. EUR',data:scenarios.map(s=>s.result.npv/1e6),backgroundColor:gold,borderColor:black,borderWidth:1},{label:'IRR %',data:scenarios.map(s=>s.result.irr!==null?s.result.irr*100:null),backgroundColor:goldDark,borderColor:black,borderWidth:1},{label:'Payback roky',data:scenarios.map(s=>s.result.payback),backgroundColor:grey,borderColor:black,borderWidth:1}]}, defaultOptions('Porovnávací graf scenárov'));
+  updateScatterCharts(r.params);
+}
+function updateScatterCharts(p){
+  const capexPts=[]; for(let m=.7;m<=1.31;m+=.05){const pp=structuredClone(p);pp.capex=p.capex*m; const rr=buildCashFlows(pp); capexPts.push({x:pp.capex/1e6,y:rr.npv/1e6});}
+  chart('capexScatterChart','scatter',{datasets:[{label:'CAPEX–NPV',data:capexPts,backgroundColor:gold,borderColor:black}]}, {...defaultOptions('Bodový graf vzťahu CAPEX a NPV'),scales:{x:{title:{display:true,text:'CAPEX mil. EUR'}},y:{title:{display:true,text:'NPV mil. EUR'}}}});
+  const pricePts=[]; for(let m=.7;m<=1.31;m+=.05){const pp=structuredClone(p);pp.price=p.price*m; const rr=buildCashFlows(pp); pricePts.push({x:pp.price,y:rr.irr!==null?rr.irr*100:null});}
+  chart('priceIrrScatterChart','scatter',{datasets:[{label:'Cena–IRR',data:pricePts,backgroundColor:goldDark,borderColor:black}]}, {...defaultOptions('Bodový graf vzťahu ceny suroviny a IRR'),scales:{x:{title:{display:true,text:'Cena EUR/t'}},y:{title:{display:true,text:'IRR %'}}}});
+}
+
+function applyVariableChange(p, key, change){
+  const pp = structuredClone(p);
+  const mult = 1 + change;
+  if(['capex','annualOpex','price','annualProd','rehab','variableCost'].includes(key)) pp[key] = Math.max(0, pp[key]*mult);
+  else if(key==='discountRate') pp.discountRate = Math.max(0.001, pp.discountRate + change);
+  else if(key==='priceGrowth') pp.priceGrowth = Math.max(-0.2, pp.priceGrowth + change);
+  else if(key==='inflation') pp.inflation = Math.max(-0.05, pp.inflation + change);
+  else if(key==='projectLife') pp.projectLife = Math.max(1, Math.round(pp.projectLife*mult));
+  else if(key==='erieiAdj') pp.erieiAdj = pp.erieiAdj + change;
+  return pp;
+}
+
+function recalculateSensitivity(){
+  const p=getParams();
+  const xKey=$('sensX').value, yKey=$('sensY').value;
+  const changes=[-0.30,-0.20,-0.10,0,0.10,0.20,0.30];
+  const rowsNpv=[], rowsIrr=[];
+  for(const cx of changes){
+    const rowN=[`${Math.round(cx*100)} %`], rowI=[`${Math.round(cx*100)} %`];
+    for(const cy of changes){
+      let pp=applyVariableChange(p,xKey,cx); pp=applyVariableChange(pp,yKey,cy);
+      const res=buildCashFlows(pp);
+      rowN.push(res.npv/1e6);
+      rowI.push(res.irr!==null?res.irr*100:null);
+    }
+    rowsNpv.push(rowN); rowsIrr.push(rowI);
+  }
+  currentSensitivity={xKey,yKey,changes,rowsNpv,rowsIrr};
+  renderMatrix('npvMatrix', changes, rowsNpv, 'npv');
+  renderMatrix('irrMatrix', changes, rowsIrr, 'irr');
+}
+function renderMatrix(id, changes, rows, type){
+  const head=[''].concat(changes.map(c=>`${Math.round(c*100)} %`));
+  const body=rows.map(r=>'<tr>'+r.map((v,i)=>{
+    if(i===0) return `<td><b>${v}</b></td>`;
+    const cls = type==='npv' ? (v>=20?'heat-good':v>=0?'heat-mid':'heat-bad') : (v>=num('minIrr')?'heat-good':v>=effectiveDiscount(getParams())*100?'heat-mid':'heat-bad');
+    return `<td class="${cls}">${v===null?'–':fmt(v,1)}</td>`;
+  }).join('')+'</tr>').join('');
+  $(id).innerHTML = `<thead><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${body}</tbody>`;
+}
+
+function randTri(min,mode,max){const u=Math.random();const c=(mode-min)/(max-min);return u<c?min+Math.sqrt(u*(max-min)*(mode-min)):max-Math.sqrt((1-u)*(max-min)*(max-mode));}
+function randNorm(mean,sd){let u=0,v=0;while(u===0)u=Math.random();while(v===0)v=Math.random();return mean+sd*Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function percentile(arr,p){if(!arr.length)return null;const a=[...arr].sort((x,y)=>x-y);const idx=(a.length-1)*p;const lo=Math.floor(idx), hi=Math.ceil(idx);return lo===hi?a[lo]:a[lo]*(hi-idx)+a[hi]*(idx-lo);}
+function mean(arr){return arr.reduce((a,b)=>a+b,0)/arr.length}
+function sd(arr){const m=mean(arr);return Math.sqrt(mean(arr.map(x=>(x-m)*(x-m))))}
+function pearson(x,y){const n=x.length;const mx=mean(x), my=mean(y);let num=0,dx=0,dy=0;for(let i=0;i<n;i++){const a=x[i]-mx,b=y[i]-my;num+=a*b;dx+=a*a;dy+=b*b;}return dx&&dy?num/Math.sqrt(dx*dy):0;}
+
+async function runMonteCarlo(){
+  const base=getParams();
+  const n=clamp(Math.round(num('mcIterations')||5000),1000,10000);
+  $('mcStatus').textContent='Monte Carlo beží...'; $('mcProgress').style.width='0%';
+  const results=[]; const vars={capex:[],opex:[],price:[],prod:[],discount:[],inflation:[],tax:[],delay:[],erieiAdj:[],rehab:[]};
+  const cfByYear=Array.from({length:Math.max(base.horizon,base.delay+base.projectLife)+1},()=>[]);
+  const chunk=250;
+  for(let i=0;i<n;i++){
+    const p=structuredClone(base);
+    const capexM=randTri(.85,1,1.35), opexM=randTri(.85,1,1.25), priceM=randTri(.75,1,1.35), prodM=randTri(.80,1,1.15), rehabM=randTri(.70,1,1.50);
+    p.capex*=capexM; p.annualOpex*=opexM; p.fixedCosts*=opexM; p.variableCost*=opexM; p.price*=priceM; p.annualProd*=prodM; p.rehab*=rehabM;
+    p.priceGrowth=clamp(randNorm(base.priceGrowth,0.012),-0.01,0.045);
+    p.opexGrowth=clamp(randNorm(base.opexGrowth,0.012),0,0.06);
+    p.discountRate=clamp(randNorm(base.discountRate,0.02),0.04,0.18);
+    p.inflation=clamp(randNorm(base.inflation,0.008),-0.01,0.08);
+    p.taxRate=clamp(randNorm(base.taxRate,0.02),0.05,0.45);
+    p.delay=[0,1,2,3,4,5,6][weightedIndex([.04,.10,.28,.24,.18,.10,.06])];
+    p.erieiAdj=clamp(randNorm(base.erieiAdj,0.005),-0.02,0.035);
+    const r=buildCashFlows(p);
+    results.push({id:i+1,npv:r.npv/1e6,irr:r.irr!==null?r.irr*100:null,discount:r.discount*100,payback:r.payback,capex:p.capex/1e6,opex:p.annualOpex/1e6,price:p.price,prod:p.annualProd,delay:p.delay,erieiAdj:p.erieiAdj*100});
+    r.cashFlows.forEach((cf,idx)=>{if(cfByYear[idx])cfByYear[idx].push(cf.freeCashFlow/1e6);});
+    vars.capex.push(p.capex); vars.opex.push(p.annualOpex); vars.price.push(p.price); vars.prod.push(p.annualProd); vars.discount.push(r.discount); vars.inflation.push(p.inflation); vars.tax.push(p.taxRate); vars.delay.push(p.delay); vars.erieiAdj.push(p.erieiAdj); vars.rehab.push(p.rehab);
+    if(i%chunk===0){$('mcProgress').style.width=`${Math.round(i/n*100)}%`; $('mcStatus').textContent=`Monte Carlo: ${i}/${n}`; await new Promise(res=>setTimeout(res,0));}
+  }
+  $('mcProgress').style.width='100%'; $('mcStatus').textContent=`Monte Carlo dokončené: ${n} iterácií`;
+  const npvs=results.map(r=>r.npv); const irrs=results.map(r=>r.irr).filter(v=>v!==null && isFinite(v));
+  const summary={n,mean:mean(npvs),median:percentile(npvs,.5),min:Math.min(...npvs),max:Math.max(...npvs),sd:sd(npvs),p5:percentile(npvs,.05),p10:percentile(npvs,.10),p50:percentile(npvs,.5),p90:percentile(npvs,.90),p95:percentile(npvs,.95),probNpvPositive:npvs.filter(v=>v>0).length/n,probIrrAboveDiscount:results.filter(r=>r.irr!==null && r.irr>r.discount).length/n,probIrrAboveMin:results.filter(r=>r.irr!==null && r.irr>base.minIrr*100).length/n,lossRisk:npvs.filter(v=>v<0).length/n,irrMedian:irrs.length?percentile(irrs,.5):null};
+  const cfIntervals=cfByYear.map((arr,year)=>({year,p5:percentile(arr,.05),p50:percentile(arr,.5),p95:percentile(arr,.95)}));
+  const sens=Object.entries(vars).map(([k,a])=>({variable:k,correlation:pearson(a,npvs)})).sort((a,b)=>Math.abs(b.correlation)-Math.abs(a.correlation));
+  currentMC={results,summary,cfIntervals,sens};
+  updateMCUI();
+  updateInterpretation();
+}
+function weightedIndex(probs){let r=Math.random(),c=0;for(let i=0;i<probs.length;i++){c+=probs[i];if(r<c)return i;}return probs.length-1;}
+
+function updateMCUI(){
+  const s=currentMC.summary;
+  const riskText = s.probNpvPositive>=.8?'nízke riziko':s.probNpvPositive>=.6?'stredné riziko':s.probNpvPositive>=.4?'zvýšené riziko':'vysoké riziko';
+  const items=[['Priemerné NPV',fmt(s.mean,1)+' mil.','good'],['Medián NPV',fmt(s.median,1)+' mil.',s.median>=0?'good':'bad'],['P5 NPV',fmt(s.p5,1)+' mil.',s.p5>=0?'good':'bad'],['P95 NPV',fmt(s.p95,1)+' mil.','good'],['P(NPV > 0)',fmtPct(s.probNpvPositive,1),s.probNpvPositive>=.6?'good':'bad'],['Riziko straty',fmtPct(s.lossRisk,1),s.lossRisk<=.25?'good':s.lossRisk<=.45?'warn':'bad'],['P(IRR > diskont)',fmtPct(s.probIrrAboveDiscount,1),s.probIrrAboveDiscount>=.6?'good':'bad'],['Rizikový profil',riskText,s.probNpvPositive>=.6?'good':'warn']];
+  $('mcKpiGrid').innerHTML=items.map(([n,v,c])=>`<div class="kpi"><div class="name">${n}</div><div class="value">${v}</div><div class="note"><span class="pill ${c}">${c==='good'?'priaznivé':c==='warn'?'hraničné':'nepriaznivé'}</span></div></div>`).join('');
+  $('mcSummaryTable').innerHTML=table(['Ukazovateľ','Hodnota'],[['Iterácie',s.n],['Priemer NPV mil. EUR',fmt(s.mean,2)],['Medián NPV mil. EUR',fmt(s.median,2)],['Minimum NPV mil. EUR',fmt(s.min,2)],['Maximum NPV mil. EUR',fmt(s.max,2)],['Smerodajná odchýlka NPV',fmt(s.sd,2)],['P5',fmt(s.p5,2)],['P10',fmt(s.p10,2)],['P50',fmt(s.p50,2)],['P90',fmt(s.p90,2)],['P95',fmt(s.p95,2)],['P(NPV > 0)',fmtPct(s.probNpvPositive,1)],['P(IRR > diskont)',fmtPct(s.probIrrAboveDiscount,1)],['P(IRR > minimum)',fmtPct(s.probIrrAboveMin,1)],['Riziko straty',fmtPct(s.lossRisk,1)]]);
+  renderMCCharts();
+}
+function histogramData(values,bins=40){const min=Math.min(...values),max=Math.max(...values),step=(max-min)/bins||1;const counts=Array(bins).fill(0);values.forEach(v=>{let i=Math.floor((v-min)/step);if(i>=bins)i=bins-1;if(i<0)i=0;counts[i]++;});return {labels:counts.map((_,i)=>fmt(min+step*(i+.5),1)),counts};}
+function renderMCCharts(){
+  const npvs=currentMC.results.map(r=>r.npv);
+  const h=histogramData(npvs,45);
+  chart('mcHistChart','bar',{labels:h.labels,datasets:[{label:'Počet simulácií',data:h.counts,backgroundColor:goldSoft,borderColor:'#fff',borderWidth:1}]}, defaultOptions('Histogram Monte Carlo simulácie – NPV'));
+  const sorted=[...npvs].sort((a,b)=>a-b); const cdfLabels=sorted.filter((_,i)=>i%Math.max(1,Math.floor(sorted.length/500))===0); const cdfData=cdfLabels.map((v,i)=>({x:v,y:(sorted.findIndex(x=>x>=v)+1)/sorted.length*100}));
+  chart('mcCdfChart','scatter',{datasets:[{label:'Kumulatívna distribúcia NPV',data:cdfData,showLine:true,borderColor:black,backgroundColor:black,pointRadius:0,tension:.2}]}, {...defaultOptions('Kumulatívna distribúcia Monte Carlo'),scales:{x:{title:{display:true,text:'NPV mil. EUR'}},y:{title:{display:true,text:'Pravdepodobnosť %'},min:0,max:100}}});
+  const cf=currentMC.cfIntervals;
+  chart('mcCfIntervalChart','line',{labels:cf.map(x=>String(x.year)),datasets:[{label:'P5',data:cf.map(x=>x.p5),borderColor:grey,backgroundColor:grey,tension:.25},{label:'P50',data:cf.map(x=>x.p50),borderColor:black,backgroundColor:black,tension:.25},{label:'P95',data:cf.map(x=>x.p95),borderColor:goldDark,backgroundColor:goldDark,tension:.25}]}, defaultOptions('Graf intervalov cash-flow P5/P50/P95'));
+  const mapLab={capex:'CAPEX',opex:'OPEX',price:'Cena',prod:'Produkcia',discount:'Diskont',inflation:'Inflácia',tax:'Daň',delay:'Oneskorenie',erieiAdj:'ERIEI úprava',rehab:'Rekultivácia'};
+  const sens=currentMC.sens.slice().reverse();
+  chart('mcTornadoChart','bar',{labels:sens.map(x=>mapLab[x.variable]||x.variable),datasets:[{label:'Korelácia s NPV',data:sens.map(x=>x.correlation),backgroundColor:sens.map(x=>x.correlation>=0?gold:grey),borderColor:black,borderWidth:1}]}, {...defaultOptions('Tornado graf citlivosti Monte Carlo'),indexAxis:'y',scales:{x:{min:-1,max:1}}});
+}
+
+function resultRows(){
+  if(!currentResult)return [];
+  const r=currentResult;
+  return [{project:r.params.projectName,country:r.params.country,npv_mil:r.npv/1e6,irr:r.irr,discount:r.discount,payback:r.payback,discountedPayback:r.discountedPayback,roi:r.roi,pi:r.pi,minDscr:r.minDscr,totalRevenue:r.totalRevenue,totalCosts:r.totalCosts,netBenefit:r.netBenefit}];
+}
+function downloadCSV(filename, rows){
+  if(!rows || !rows.length){alert('Nie sú dostupné dáta na export.');return;}
+  const headers=Object.keys(rows[0]);
+  const csv=[headers.join(';')].concat(rows.map(r=>headers.map(h=>String(r[h]??'').replaceAll(';',',')).join(';'))).join('\n');
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+}
+
+function updateInterpretation(){
+  if(!currentResult)return;
+  const r=currentResult, p=r.params;
+  const mc=currentMC ? currentMC.summary : null;
+  const irrOk = r.irr!==null && r.irr>r.discount;
+  const stablePess = currentScenarios.find(s=>s.scenario==='Pesimistický')?.result.npv>0;
+  const topSens = currentMC && currentMC.sens.length ? currentMC.sens.slice(0,3).map(x=>x.variable).join(', ') : 'Monte Carlo citlivosť zatiaľ nebola spustená';
+  const decision = r.npv>0 && irrOk && r.discountedPayback!==null ? 'Projekt je ekonomicky efektívny a pri zadaných vstupoch vytvára kladnú čistú súčasnú hodnotu.' : 'Projekt má zvýšené ekonomické riziko a pri zadaných vstupoch nespĺňa všetky investičné kritériá.';
+  const erieiText = p.erieiScore>=60 ? 'Vybraná krajina znižuje investičné riziko prostredníctvom priaznivejšieho ERIEI skóre.' : p.erieiScore>=45 ? 'Vybraná krajina má stredné ERIEI skóre, preto je potrebné dôsledne sledovať krajinnú rizikovú prirážku.' : 'Nízke ERIEI skóre zvyšuje požadovanú návratnosť a rizikovú prirážku projektu.';
+  const mcText = mc ? `Monte Carlo simulácia ukazuje pravdepodobnosť kladnej NPV ${fmtPct(mc.probNpvPositive,1)}, medián NPV ${fmt(mc.median,1)} mil. EUR a 90 % interval P5–P95 od ${fmt(mc.p5,1)} do ${fmt(mc.p95,1)} mil. EUR.` : 'Monte Carlo simulácia ešte nebola spustená; pre robustné rizikové hodnotenie ju odporúčame spustiť.';
+  $('interpretation').textContent = `${decision}\n\nNPV projektu je ${fmt(r.npv/1e6,2)} mil. ${p.currency}. IRR je ${r.irr!==null?fmtPct(r.irr,1):'neurčená'} a efektívna diskontná sadzba je ${fmtPct(r.discount,1)}. ${irrOk?'IRR presahuje diskontnú sadzbu, čo podporuje ekonomickú prijateľnosť projektu.':'IRR nepresahuje diskontnú sadzbu alebo nie je robustne určiteľná, čo zvyšuje investičné riziko.'}\n\nJednoduchá doba návratnosti je ${r.payback!==null?fmt(r.payback,1)+' roka':'nedosiahnutá'} a diskontovaná doba návratnosti je ${r.discountedPayback!==null?fmt(r.discountedPayback,1)+' roka':'nedosiahnutá'}. Profitability index je ${r.pi!==null?fmt(r.pi,2):'neurčený'} a minimálne DSCR je ${r.minDscr!==null?fmt(r.minDscr,2):'bez úverového zaťaženia'}.\n\n${erieiText} ERIEI skóre krajiny ${p.country} je ${fmt(p.erieiScore,0)} bodov a trieda krajiny je ${erieiClass(p.erieiScore)}. Materiálová dovozná závislosť je ${fmt(p.importDependence,1)} %, produktivita zdrojov ${fmt(p.resourceProductivity,2)} a index surovinovej bezpečnosti ${fmt(p.securityIndex,0)} bodov.\n\nPesimistický scenár je ${stablePess?'stabilný, pretože aj pri nepriaznivých vstupoch ostáva NPV kladná.':'nestabilný, pretože pri nepriaznivých vstupoch môže projekt stratiť ekonomickú hodnotu.'}\n\n${mcText}\n\nNajvýznamnejšie rizikové vstupy podľa aktuálnej simulácie: ${topSens}. Pre investora je rozhodujúce preveriť predovšetkým trhovú cenu suroviny, CAPEX, produkčný profil, povoľovacie oneskorenie a krajinnú rizikovú prirážku. Odporúčanie: projekt je vhodné posudzovať nie iba cez bodovú NPV, ale cez kombináciu scenárov, citlivostnej matice a Monte Carlo rizikového intervalu.`;
+}
+
+init();
+</script>
+</body>
+</html>
