@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kalkulačka ekonomiky zemských zdrojov</title>
+<style>
+:root{
+  --ink:#082538;
+  --muted:#587384;
+  --blue:#174a8b;
+  --navy:#0b3045;
+  --teal:#12846f;
+  --mint:#66e4c8;
+  --cyan:#28a8c7;
+  --bg:#effbf8;
+  --card:#ffffff;
+  --line:#d6eee9;
+  --line2:#edf7f4;
+  --shadow:0 18px 50px rgba(11,48,69,.11);
+  --shadow2:0 8px 22px rgba(11,48,69,.07);
+  --grad:linear-gradient(135deg,#174a8b 0%,#12846f 50%,#66e4c8 100%);
+  --grad2:linear-gradient(135deg,rgba(23,74,139,.11),rgba(18,132,111,.10),rgba(102,228,200,.20));
+  --radius:22px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(circle at 0% -5%,rgba(102,228,200,.35),transparent 28rem),
+    radial-gradient(circle at 100% 0%,rgba(40,168,199,.18),transparent 30rem),
+    linear-gradient(180deg,#f9fffd 0%,#effbf8 100%);
+  min-height:100vh;
+}
+button,input,select{font:inherit}
+button{-webkit-tap-highlight-color:transparent}
+.app{width:min(1540px,100%);margin:0 auto;padding:clamp(10px,2vw,22px)}
+.notice{
+  display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:20px;
+  background:rgba(255,255,255,.92);border:1px solid var(--line);box-shadow:var(--shadow2);
+  font-weight:850;color:#174a8b;margin-bottom:14px;line-height:1.35;
+}
+.notice span{flex:0 0 26px;display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--grad);color:#fff;font-size:14px}
+.hero{position:relative;overflow:hidden;border-radius:32px;padding:clamp(20px,3vw,32px);color:#fff;background:var(--grad);box-shadow:var(--shadow);isolation:isolate}
+.hero:before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.22),transparent 38%,rgba(255,255,255,.12));pointer-events:none;z-index:-1}
+.hero:after{content:"";position:absolute;right:-80px;top:-70px;width:290px;height:290px;border:1px solid rgba(255,255,255,.24);border-radius:50%;z-index:-1}
+.hero-grid{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1.12fr) minmax(300px,.88fr);gap:clamp(14px,2vw,22px);align-items:center}
+.kicker{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:8px 12px;font-size:13px;font-weight:850;margin-bottom:12px;backdrop-filter:blur(8px)}
+h1{margin:0;font-size:clamp(30px,4.4vw,60px);line-height:.95;letter-spacing:-.05em;max-width:980px}
+.hero-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}.hero-tags span{display:inline-flex;padding:9px 12px;border-radius:999px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.24);font-size:12px;font-weight:850;white-space:nowrap}
+.hero-panel{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.26);border-radius:24px;padding:16px;backdrop-filter:blur(12px)}
+.hero-panel h3{margin:0 0 12px;font-size:15px;color:#fff}.mini-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.mini-kpi{border:1px solid rgba(255,255,255,.23);background:rgba(255,255,255,.12);border-radius:18px;padding:12px;min-width:0}.mini-kpi span{display:block;font-size:11px;opacity:.82}.mini-kpi strong{display:block;margin-top:4px;font-size:13px;line-height:1.25}
+.tabs{display:flex;gap:8px;align-items:center;margin:14px 0;flex-wrap:wrap;position:sticky;top:0;z-index:20;padding:10px;border-radius:22px;background:rgba(247,255,253,.88);backdrop-filter:blur(16px);border:1px solid var(--line);box-shadow:0 10px 26px rgba(11,48,69,.06)}
+.tab-btn,.btn{appearance:none;border:0;border-radius:999px;padding:11px 15px;font-weight:900;cursor:pointer;color:var(--ink);background:#fff;box-shadow:0 5px 14px rgba(11,48,69,.08);min-height:42px;transition:transform .15s ease, box-shadow .15s ease, background .15s ease}
+.tab-btn:hover,.btn:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(11,48,69,.10)}.tab-btn.active,.btn.primary{background:var(--grad);color:white}.btn.subtle{box-shadow:none;border:1px solid var(--line);background:#f9fffd}.btn:active{transform:translateY(1px)}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,360px);gap:14px;align-items:start}.sheet{display:none}.sheet.active{display:block}
+.card,.chart-card,.variant-card,.kpi{background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow2)}
+.card{padding:clamp(14px,1.6vw,18px);margin-bottom:14px}.section-title{display:flex;align-items:center;gap:10px;margin-bottom:14px;min-width:0}.section-title h2{min-width:0}.pill{display:inline-flex;align-items:center;border-radius:999px;background:var(--grad2);color:#0d5e75;font-weight:900;font-size:12px;padding:7px 10px;white-space:nowrap}
+h2{font-size:clamp(19px,2vw,24px);margin:0;letter-spacing:-.03em}h3{font-size:clamp(15px,1.4vw,17px);margin:0 0 12px;letter-spacing:-.015em}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}.input-group label{display:block;font-size:12px;font-weight:900;color:#24414f;margin-bottom:6px}.input-group input,.input-group select{width:100%;border:1px solid var(--line);border-radius:15px;padding:12px;background:#fbfffe;color:var(--ink);font-weight:760;outline:none;min-height:44px}.input-group input:focus,.input-group select:focus{border-color:#28a8c7;box-shadow:0 0 0 4px rgba(40,168,199,.13)}
+.v4-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}.country-card{border:1px solid var(--line);border-radius:20px;background:#fbfffe;padding:14px;cursor:pointer;transition:.16s ease;min-height:92px}.country-card:hover{transform:translateY(-2px);box-shadow:0 10px 25px rgba(11,48,69,.08)}.country-card.active{border-color:#28a8c7;background:linear-gradient(135deg,rgba(23,74,139,.12),rgba(102,228,200,.25))}.country-card strong{display:block;font-size:18px}.country-card span{display:block;color:var(--muted);font-size:12px;margin-top:4px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:14px}.kpi{padding:14px;background:linear-gradient(180deg,#fff,#f8fffd)}.kpi span{font-size:11px;color:var(--muted);font-weight:900;text-transform:uppercase;letter-spacing:.04em}.kpi strong{display:block;margin:6px 0 2px;font-size:clamp(19px,2.2vw,24px);color:#0b3045}.kpi small{font-size:11px;color:var(--muted)}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px}.badge{display:inline-flex;border-radius:999px;background:#effcf8;color:#0f6571;font-weight:900;font-size:12px;padding:7px 10px;border:1px solid var(--line)}
+.dashboard-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(300px,1fr);gap:14px;align-items:start}.chart-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.chart-card{background:linear-gradient(180deg,#fff,#f8fffd);padding:14px}.chart-wrap{width:100%;height:clamp(260px,28vw,320px);position:relative}.chart-wrap.big{height:clamp(310px,34vw,390px)}.chart-wrap.small{height:clamp(230px,25vw,280px)}svg.chart{width:100%;height:100%;display:block;overflow:visible}.axis{stroke:#d7ebe6;stroke-width:1}.axis-text{fill:#587181;font-size:11px;font-weight:700}.legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:#4f6c7c;font-weight:800}.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-2px}
+.analysis{position:sticky;top:92px;max-height:calc(100vh - 112px);overflow:auto}.analysis p,.analysis li{font-size:13px;line-height:1.58;color:#274456}.analysis ul{padding-left:18px;margin:8px 0}.status{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:8px 10px;font-weight:900;font-size:12px}.status.good{background:#e8fbf5;color:#087a5d}.status.warn{background:#fff6df;color:#93610a}.status.bad{background:#fff0f2;color:#9e2137}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:16px;background:#fff;-webkit-overflow-scrolling:touch}table{width:100%;border-collapse:collapse;font-size:12px;white-space:nowrap}th{background:#eefbf8;color:#0b3045;text-align:right;padding:10px;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:1}td{text-align:right;padding:9px;border-bottom:1px solid #edf6f3}th:first-child,td:first-child{text-align:left}.positive{color:#087a5d;font-weight:900}.negative{color:#9e2137;font-weight:900}
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}.toolbar .push{margin-left:auto}.variant-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}.variant-card{padding:14px;background:#fff}.variant-card h3{margin:0 0 8px}.variant-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}.metric{background:#f7fffd;border:1px solid var(--line);border-radius:14px;padding:9px}.metric span{display:block;font-size:11px;color:var(--muted);font-weight:900}.metric strong{display:block;margin-top:3px}.note{color:var(--muted);font-size:13px;line-height:1.45}.hidden{display:none!important}.export-zone{background:#fff;border-radius:20px}
+@media (max-width:1180px){.layout,.dashboard-grid{grid-template-columns:1fr}.analysis{position:relative;top:auto;max-height:none}.chart-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:820px){.app{padding:10px}.notice{border-radius:16px}.hero{border-radius:24px}.hero-grid{grid-template-columns:1fr}.hero-panel{padding:13px}.mini-kpis{grid-template-columns:1fr 1fr}.tabs{position:sticky;top:0;overflow-x:auto;flex-wrap:nowrap;justify-content:flex-start;border-radius:18px;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}.tab-btn,.btn{flex:0 0 auto;width:auto;white-space:nowrap}.chart-grid{grid-template-columns:1fr}.toolbar .push{margin-left:0}.section-title{align-items:flex-start;flex-direction:column;gap:6px}.chart-wrap,.chart-wrap.big,.chart-wrap.small{height:280px}.variant-metrics{grid-template-columns:1fr}}
+@media (max-width:520px){h1{font-size:32px}.hero-tags span{font-size:11px;padding:8px 10px}.mini-kpis{grid-template-columns:1fr}.form-grid,.kpi-grid,.v4-cards,.variant-cards{grid-template-columns:1fr}.card{padding:13px;border-radius:18px}.chart-card{padding:12px;border-radius:18px}.chart-wrap,.chart-wrap.big,.chart-wrap.small{height:245px}.tab-btn,.btn{min-height:40px;padding:10px 12px;font-size:13px}.toolbar .btn{width:100%;justify-content:center}.table-wrap{font-size:11px}th,td{padding:8px}}
+
+/* finálna responzívna úprava pre PC, tablet a mobil */
+@media (min-width:1400px){
+  .dashboard-grid{grid-template-columns:minmax(0,2.15fr) minmax(340px,.85fr)}
+  .chart-wrap.big{height:410px}.chart-wrap{height:340px}.chart-wrap.small{height:300px}
+}
+@media (max-width:980px){
+  .hero-grid,.layout,.dashboard-grid{grid-template-columns:1fr!important}
+  .analysis{position:relative;top:auto;max-height:none}
+  .kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .chart-grid{grid-template-columns:1fr!important}
+  .toolbar{align-items:stretch}.toolbar .push{display:none}
+}
+@media (max-width:640px){
+  .app{padding:8px}.notice{font-size:13px;padding:10px 12px}
+  .hero{padding:18px;border-radius:22px}.hero-panel{display:none}
+  h1{font-size:clamp(28px,9vw,38px);line-height:1.02}
+  .hero-tags{gap:6px}.hero-tags span{font-size:11px;padding:7px 9px}
+  .tabs{margin:10px 0;padding:8px;border-radius:16px;gap:6px}
+  .tab-btn,.btn{font-size:13px;min-height:40px;padding:9px 11px}
+  .card,.chart-card,.kpi,.variant-card{border-radius:16px}
+  .form-grid,.kpi-grid,.v4-cards,.variant-cards,.variant-metrics{grid-template-columns:1fr!important}
+  .input-group input,.input-group select{min-height:46px;font-size:16px}
+  .chart-wrap,.chart-wrap.big,.chart-wrap.small{height:250px!important}
+  .toolbar .btn{width:100%;justify-content:center;text-align:center}
+  .toolbar .input-group{max-width:none!important;width:100%}
+  .table-wrap{border-radius:14px}table{font-size:11px}th,td{padding:8px 7px}
+}
+
+@media print{@page{size:A4 portrait;margin:10mm}html,body{background:#fff!important;color:#0b2436!important}.app{max-width:none!important;margin:0!important;padding:0!important}.notice,.hero,.tabs,#inputs{display:none!important}body.print-dashboard #dashboard{display:block!important}body.print-dashboard #variants{display:none!important}body.print-variants #variants{display:block!important}body.print-variants #dashboard{display:none!important}.dashboard-grid,.chart-grid,.layout{display:block!important;grid-template-columns:1fr!important}.analysis{position:static!important;top:auto!important;max-height:none!important;overflow:visible!important}.card,.chart-card,.kpi,.variant-card{box-shadow:none!important;break-inside:avoid;page-break-inside:avoid;background:#fff!important}.toolbar,.btn{display:none!important}.chart-wrap{height:240px!important}.chart-wrap.big{height:270px!important}table{font-size:9px!important}th,td{padding:5px!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="notice"><span>i</span> Len ukážka pre cvičenia — výstupy slúžia na výučbu metodiky a nenahrádzajú odbornú štúdiu projektu.</div>
+  <section class="hero">
+    <div class="hero-grid">
+      <div>
+        <div class="kicker">Autor: Ing. Maksym Mykhei</div>
+        <h1>Kalkulačka ekonomiky zemských zdrojov</h1>
+        <div class="hero-tags">
+          <span>Cash flow</span><span>NPV · IRR</span><span>Úverové financovanie</span><span>Scenárová analýza</span>
+        </div>
+      </div>
+      <div class="hero-panel">
+        <h3>Rýchly prehľad modelu</h3>
+        <div class="mini-kpis">
+          <div class="mini-kpi"><span>Model</span><strong>Projektové NPV</strong></div>
+          <div class="mini-kpi"><span>Financovanie</span><strong>Dlh + vlastný kapitál</strong></div>
+          <div class="mini-kpi"><span>Výstupy</span><strong>CSV, Excel, PNG, JSON</strong></div>
+          <div class="mini-kpi"><span>Scenáre</span><strong>Pesimistický · realistický · optimistický</strong></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="inputs">Hárok Vstupy</button>
+    <button class="tab-btn" data-tab="dashboard">Hárok Dashboard analýza</button>
+    <button class="tab-btn" data-tab="variants">Hárok Varianty</button>
+    <button class="btn subtle" id="saveJsonBtn">Uložiť JSON</button>
+    <button class="btn subtle" id="loadJsonBtn">Načítať JSON</button>
+    <button class="btn primary" id="recalcBtn">Prepočítať model</button>
+    <button class="btn subtle" id="resetBtn">Obnoviť vstupy</button>
+    <input id="jsonFileInput" class="hidden" type="file" accept="application/json,.json">
+  </nav>
+
+  <section id="inputs" class="sheet active">
+    <div class="card">
+      <div class="section-title"><span class="pill">V4</span><h2>Prednastavenia podľa krajiny</h2></div>
+      <p class="note">Výber krajiny nastaví orientačné sadzby a indexy. Všetky hodnoty možno následne upraviť vo vstupoch.</p>
+      <div class="v4-cards" id="countryCards"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title"><span class="pill">Vstupy</span><h2>Základné projektové parametre</h2></div>
+      <div class="form-grid">
+        <div class="input-group"><label>Názov projektu</label><input id="projectName" value="Projekt zemských zdrojov"></div>
+        <div class="input-group"><label>Krajina</label><select id="country"></select></div>
+        <div class="input-group"><label>Ročná ťažba rudy (kt)</label><input id="ore" type="number" value="850" step="10"></div>
+        <div class="input-group"><label>Životnosť prevádzky (roky)</label><input id="life" type="number" value="10" min="1" step="1"></div>
+        <div class="input-group"><label>Obsah úžitkovej zložky (%)</label><input id="grade" type="number" value="1.15" step="0.01"></div>
+        <div class="input-group"><label>Výťažnosť (%)</label><input id="recovery" type="number" value="84" step="1"></div>
+        <div class="input-group"><label>Zaplatený podiel (%)</label><input id="payable" type="number" value="94" step="1"></div>
+        <div class="input-group"><label>Cena produktu (EUR/t)</label><input id="price" type="number" value="7600" step="100"></div>
+        <div class="input-group"><label>Rast ceny ročne (%)</label><input id="priceGrowth" type="number" value="1.5" step="0.1"></div>
+        <div class="input-group"><label>CAPEX (mil. EUR)</label><input id="capex" type="number" value="125" step="1"></div>
+        <div class="input-group"><label>Contingency (%)</label><input id="contingency" type="number" value="10" step="1"></div>
+        <div class="input-group"><label>Dotácia / grant (mil. EUR)</label><input id="subsidy" type="number" value="0" step="1"></div>
+        <div class="input-group"><label>Výstavba (roky)</label><input id="constructionYears" type="number" value="2" min="1" step="1"></div>
+        <div class="input-group"><label>OPEX variabilný (EUR/t rudy)</label><input id="opexTon" type="number" value="24" step="1"></div>
+        <div class="input-group"><label>Fixný OPEX (mil. EUR/rok)</label><input id="fixedOpex" type="number" value="6" step="0.5"></div>
+        <div class="input-group"><label>Sustaining CAPEX (mil. EUR/rok)</label><input id="sustCapex" type="number" value="2.5" step="0.5"></div>
+        <div class="input-group"><label>Environmentálne náklady (mil. EUR/rok)</label><input id="envCost" type="number" value="1.2" step="0.1"></div>
+        <div class="input-group"><label>Uzatvorenie bane (mil. EUR)</label><input id="closureCost" type="number" value="15" step="1"></div>
+        <div class="input-group"><label>Pracovný kapitál z tržieb (%)</label><input id="wcRate" type="number" value="8" step="1"></div>
+        <div class="input-group"><label>Inflácia nákladov (%)</label><input id="inflation" type="number" value="3" step="0.1"></div>
+        <div class="input-group"><label>Daň zo zisku (%)</label><input id="taxRate" type="number" value="21" step="1"></div>
+        <div class="input-group"><label>Royalty / poplatok z tržieb (%)</label><input id="royalty" type="number" value="2" step="0.1"></div>
+        <div class="input-group"><label>Diskontná sadzba (%)</label><input id="discount" type="number" value="10" step="0.1"></div>
+        <div class="input-group"><label>Odpisovanie CAPEX (roky)</label><input id="deprYears" type="number" value="8" min="1" step="1"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title"><span class="pill">Úver</span><h2>Financovanie a dlhová služba</h2></div>
+      <div class="form-grid">
+        <div class="input-group"><label>Podiel úveru z netto CAPEX (%)</label><input id="debtShare" type="number" value="60" step="5"></div>
+        <div class="input-group"><label>Úroková sadzba (%)</label><input id="interest" type="number" value="6.5" step="0.1"></div>
+        <div class="input-group"><label>Splatnosť úveru (roky)</label><input id="debtTerm" type="number" value="8" min="1" step="1"></div>
+        <div class="input-group"><label>Odklad splátok istiny (roky po výstavbe)</label><input id="grace" type="number" value="1" min="0" step="1"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="dashboard" class="sheet">
+    <div id="dashboardExport" class="export-zone">
+      <div class="kpi-grid">
+        <div class="kpi"><span>NPV projektu</span><strong id="kpiNpv">—</strong><small>diskontovaný voľný CF</small></div>
+        <div class="kpi"><span>IRR</span><strong id="kpiIrr">—</strong><small>vnútorná výnosnosť</small></div>
+        <div class="kpi"><span>Návratnosť</span><strong id="kpiPayback">—</strong><small>jednoduchý payback</small></div>
+        <div class="kpi"><span>Min. DSCR</span><strong id="kpiDscr">—</strong><small>v rokoch dlhovej služby</small></div>
+        <div class="kpi"><span>Rozhodovací signál</span><strong id="kpiSignal">—</strong><small>podľa NPV, IRR a DSCR</small></div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div>
+          <div class="card">
+            <div class="section-title"><span class="pill">Dashboard</span><h2 id="dashTitle">Analýza projektu</h2></div>
+            <div class="badges">
+              <span class="badge" id="badgeCountry">Krajina: —</span>
+              <span class="badge" id="badgeDebt">Úver: —</span>
+              <span class="badge" id="badgeDebtService">Dlhová služba: —</span>
+              <span class="badge" id="badgeLife">Životnosť: —</span>
+            </div>
+            <div class="toolbar">
+              <button class="btn subtle period-btn active" data-period="annual">Ročne</button>
+              <button class="btn subtle period-btn" data-period="monthly">Mesačne</button>
+              <div class="input-group" style="max-width:180px"><label>Rok pre mesačný detail</label><select id="monthlyYear"></select></div>
+              <div class="push"></div>
+              <button class="btn subtle" data-export="dashboard-xls">Excel</button>
+              <button class="btn subtle" data-export="dashboard-csv">CSV</button>
+              <button class="btn subtle" data-export="dashboard-png">PNG</button>
+            </div>
+            <div class="chart-card">
+              <h3>Kumulatívny ekonomický vývoj</h3>
+              <div class="chart-wrap big" id="cashChart"></div>
+              <div class="legend" id="cashLegend"></div>
+            </div>
+          </div>
+          <div class="chart-grid">
+            <div class="chart-card"><h3>Kumulovaný FCF</h3><div class="chart-wrap small" id="cumChart"></div><div class="legend" id="cumLegend"></div></div>
+            <div class="chart-card"><h3>Štruktúra výdavkov</h3><div class="chart-wrap small" id="costChart"></div><div class="legend" id="costLegend"></div></div>
+            <div class="chart-card"><h3>Kumulované tržby a EBITDA</h3><div class="chart-wrap small" id="trendChart"></div><div class="legend" id="trendLegend"></div></div>
+            <div class="chart-card"><h3>Úver, úroky, istina a DSCR</h3><div class="chart-wrap small" id="debtChart"></div><div class="legend" id="debtLegend"></div></div>
+          </div>
+          <div class="card">
+            <h3>Ročný ekonomický model</h3>
+            <div class="table-wrap"><table id="cashTable"></table></div>
+          </div>
+        </div>
+        <aside class="card analysis">
+          <h3>Plávajúca analýza</h3>
+          <div id="statusBadge" class="status warn">Čaká na prepočet</div>
+          <div id="analysisText"></div>
+          <hr style="border:0;border-top:1px solid var(--line);margin:12px 0">
+          <h3>Mesačný pohľad</h3>
+          <div class="chart-wrap small" id="monthlyMixChart"></div>
+          <div class="legend" id="monthlyMixLegend"></div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section id="variants" class="sheet">
+    <div id="variantsExport" class="export-zone">
+      <div class="card">
+        <div class="section-title"><span class="pill">Varianty</span><h2>Pesimistický, realistický a optimistický scenár</h2></div>
+        <div class="toolbar">
+          <p class="note" style="margin:0">Scenáre menia cenu, CAPEX, OPEX, výťažnosť, diskont a úrok. Vychádzajú z aktuálnych vstupov.</p>
+          <div class="push"></div>
+          <button class="btn subtle" data-export="variants-xls">Excel</button>
+          <button class="btn subtle" data-export="variants-csv">CSV</button>
+          <button class="btn subtle" data-export="variants-png">PNG</button>
+        </div>
+        <div class="variant-cards" id="variantCards"></div>
+      </div>
+      <div class="chart-grid">
+        <div class="chart-card"><h3>NPV projektu a kapitálu</h3><div class="chart-wrap" id="variantNpvChart"></div><div class="legend" id="variantNpvLegend"></div></div>
+        <div class="chart-card"><h3>IRR a minimálne DSCR</h3><div class="chart-wrap" id="variantIrrChart"></div><div class="legend" id="variantIrrLegend"></div></div>
+        <div class="chart-card"><h3>Kumulované hodnoty scenárov</h3><div class="chart-wrap" id="variantStackChart"></div><div class="legend" id="variantStackLegend"></div></div>
+        <div class="chart-card"><h3>CAPEX, istina a úroky</h3><div class="chart-wrap" id="variantDebtChart"></div><div class="legend" id="variantDebtLegend"></div></div>
+      </div>
+      <div class="card">
+        <h3>Tabuľka scenárov</h3>
+        <div class="table-wrap"><table id="variantTable"></table></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const countries = {
+  SK:{name:'Slovensko',taxRate:21,discount:10,royalty:2.0,opexIndex:1.00,interest:6.5},
+  CZ:{name:'Česko',taxRate:21,discount:9.5,royalty:1.8,opexIndex:1.05,interest:6.2},
+  PL:{name:'Poľsko',taxRate:19,discount:10.5,royalty:2.2,opexIndex:.96,interest:6.8},
+  HU:{name:'Maďarsko',taxRate:9,discount:11.0,royalty:1.7,opexIndex:.98,interest:7.0}
+};
+let activeTab='inputs', activePeriod='annual', currentResult=null;
+
+function fmtNum(v,d=2){ if(v===null || v===undefined || !isFinite(v)) return '—'; return Number(v).toLocaleString('sk-SK',{minimumFractionDigits:d,maximumFractionDigits:d}); }
+function fmtMil(v){ if(v===null || v===undefined || !isFinite(v)) return '—'; return fmtNum(v,2)+' mil. €'; }
+function fmtPct(v){ if(v===null || v===undefined || !isFinite(v)) return '—'; return fmtNum(v,2)+' %'; }
+function num(id){ const v=parseFloat($(id).value); return isFinite(v)?v:0; }
+function clamp(v,min,max){ return Math.min(max,Math.max(min,v)); }
+function valPct(id){ return num(id)/100; }
+
+function init(){
+  const countrySelect=$('country');
+  Object.entries(countries).forEach(([code,c])=>{
+    const op=document.createElement('option'); op.value=code; op.textContent=c.name; countrySelect.appendChild(op);
+  });
+  countrySelect.value='SK';
+  renderCountryCards();
+  countrySelect.addEventListener('change',()=>applyCountry(countrySelect.value));
+  document.querySelectorAll('.tab-btn').forEach(btn=>btn.addEventListener('click',()=>setTab(btn.dataset.tab)));
+  $('recalcBtn').addEventListener('click',()=>{ recalc(); setTab('dashboard'); });
+  $('resetBtn').addEventListener('click',resetInputs);
+  $('saveJsonBtn').addEventListener('click',saveJsonModel);
+  $('loadJsonBtn').addEventListener('click',()=>{$('jsonFileInput').value=''; $('jsonFileInput').click();});
+  $('jsonFileInput').addEventListener('change',loadJsonModel);
+  document.querySelectorAll('input,select').forEach(el=>el.addEventListener('change',()=>{ if(el.id!=='country') recalc(false); }));
+  document.querySelectorAll('.period-btn').forEach(btn=>btn.addEventListener('click',()=>{ activePeriod=btn.dataset.period; document.querySelectorAll('.period-btn').forEach(b=>b.classList.toggle('active',b===btn)); if(currentResult) renderDashboard(currentResult); }));
+  $('monthlyYear').addEventListener('change',()=>{ if(currentResult) renderDashboard(currentResult); });
+  document.querySelectorAll('[data-export]').forEach(btn=>btn.addEventListener('click',()=>handleExport(btn.dataset.export)));
+  applyCountry('SK');
+  recalc(false);
+}
+function renderCountryCards(){
+  const box=$('countryCards'); box.innerHTML='';
+  Object.entries(countries).forEach(([code,c])=>{
+    const div=document.createElement('div');
+    div.className='country-card';
+    div.dataset.country=code;
+    div.innerHTML=`<strong>${code}</strong><span>${c.name}</span><span>Daň ${c.taxRate} %, diskont ${c.discount} %</span>`;
+    div.addEventListener('click',()=>{ $('country').value=code; applyCountry(code); });
+    box.appendChild(div);
+  });
+}
+function applyCountry(code){
+  const c=countries[code]||countries.SK;
+  $('taxRate').value=c.taxRate;
+  $('discount').value=c.discount;
+  $('royalty').value=c.royalty;
+  $('interest').value=c.interest;
+  const baseOpex=24*c.opexIndex;
+  $('opexTon').value=baseOpex.toFixed(1);
+  document.querySelectorAll('.country-card').forEach(card=>card.classList.toggle('active',card.dataset.country===code));
+  recalc(false);
+}
+function resetInputs(){
+  const defaults={
+    projectName:'Projekt zemských zdrojov', ore:850, life:10, grade:1.15, recovery:84, payable:94, price:7600, priceGrowth:1.5,
+    capex:125, contingency:10, subsidy:0, constructionYears:2, opexTon:24, fixedOpex:6, sustCapex:2.5, envCost:1.2,
+    closureCost:15, wcRate:8, inflation:3, taxRate:21, royalty:2, discount:10, deprYears:8, debtShare:60, interest:6.5, debtTerm:8, grace:1
+  };
+  Object.entries(defaults).forEach(([k,v])=>{ if($(k)) $(k).value=v; });
+  $('country').value='SK'; applyCountry('SK');
+}
+function getInputs(){
+  const code=$('country').value || 'SK', c=countries[code]||countries.SK;
+  return {
+    projectName:$('projectName').value || 'Projekt zemských zdrojov',
+    countryCode:code, countryName:c.name,
+    ore:Math.max(1,num('ore')), life:Math.max(1,Math.round(num('life'))),
+    grade:clamp(valPct('grade'),0,1), recovery:clamp(valPct('recovery'),0,1), payable:clamp(valPct('payable'),0,1),
+    price:Math.max(0,num('price')), priceGrowth:valPct('priceGrowth'), capex:Math.max(0,num('capex')),
+    contingency:Math.max(0,valPct('contingency')), subsidy:Math.max(0,num('subsidy')),
+    constructionYears:Math.max(1,Math.round(num('constructionYears'))),
+    opexTon:Math.max(0,num('opexTon')), fixedOpex:Math.max(0,num('fixedOpex')),
+    sustCapex:Math.max(0,num('sustCapex')), envCost:Math.max(0,num('envCost')), closureCost:Math.max(0,num('closureCost')),
+    wcRate:Math.max(0,valPct('wcRate')), inflation:valPct('inflation'),
+    taxRate:Math.max(0,valPct('taxRate')), royalty:Math.max(0,valPct('royalty')),
+    discount:Math.max(0.0001,valPct('discount')), deprYears:Math.max(1,Math.round(num('deprYears'))),
+    debtShare:clamp(valPct('debtShare'),0,1), interest:Math.max(0,valPct('interest')),
+    debtTerm:Math.max(1,Math.round(num('debtTerm'))), grace:Math.max(0,Math.round(num('grace')))
+  };
+}
+function calculate(inp){
+  const lastYear = inp.constructionYears + inp.life - 1;
+  const capexGross = inp.capex * (1+inp.contingency);
+  const subsidy = Math.min(inp.subsidy, capexGross);
+  const netCapex = Math.max(0, capexGross - subsidy);
+  const debtPrincipal = netCapex * inp.debtShare;
+  const equityContribution = netCapex - debtPrincipal;
+  const capexPerConstruction = capexGross / inp.constructionYears;
+  const subsidyPerConstruction = subsidy / inp.constructionYears;
+  const debtDrawPerConstruction = debtPrincipal / inp.constructionYears;
+  const scheduledPrincipal = debtPrincipal / Math.min(inp.debtTerm, inp.life);
+  const rows=[]; let outstanding=0, previousWC=0, cum=0, maxCumNeg=0;
+  for(let year=0; year<=lastYear; year++){
+    const opYear = year - inp.constructionYears + 1;
+    const isConstruction = year < inp.constructionYears;
+    const isOperation = opYear>=1 && opYear<=inp.life;
+    const isFinalOperation = opYear===inp.life;
+    const capex = isConstruction ? capexPerConstruction : 0;
+    const subsidyIn = isConstruction ? subsidyPerConstruction : 0;
+    const debtDraw = isConstruction ? debtDrawPerConstruction : 0;
+    outstanding += debtDraw;
+
+    let product=0, price=0, revenue=0, opex=0, royalty=0, env=0, sustaining=0, depreciation=0, tax=0, closure=0, deltaWC=0, requiredWC=0;
+    if(isOperation){
+      price = inp.price * Math.pow(1+inp.priceGrowth, opYear-1);
+      product = (inp.ore*1000) * inp.grade * inp.recovery * inp.payable;
+      revenue = product * price / 1e6;
+      opex = ((inp.ore*1000) * inp.opexTon)/1e6 * Math.pow(1+inp.inflation, opYear-1) + inp.fixedOpex*Math.pow(1+inp.inflation, opYear-1);
+      royalty = revenue * inp.royalty;
+      env = inp.envCost * Math.pow(1+inp.inflation, opYear-1);
+      sustaining = inp.sustCapex;
+      depreciation = opYear<=Math.min(inp.deprYears,inp.life) ? capexGross/inp.deprYears : 0;
+      const ebit = revenue - opex - royalty - env - depreciation;
+      tax = Math.max(0, ebit * inp.taxRate);
+      if(isFinalOperation){
+        deltaWC = -previousWC;
+        previousWC = 0;
+        closure = inp.closureCost;
+      } else {
+        requiredWC = revenue * inp.wcRate;
+        deltaWC = requiredWC - previousWC;
+        previousWC = requiredWC;
+      }
+    }
+    const ebitda = revenue - opex - royalty - env;
+    const cfads = isOperation ? ebitda - tax - sustaining - deltaWC - closure : 0;
+
+    let interest=0, principal=0;
+    if(outstanding>0){
+      interest = outstanding * inp.interest;
+      const repaymentAllowed = isOperation && opYear>inp.grace;
+      if(repaymentAllowed){
+        principal = Math.min(outstanding, scheduledPrincipal);
+        if(isFinalOperation) principal = outstanding;
+      }
+    }
+    const debtService = interest + principal;
+    const dscr = isOperation && debtService>0 ? cfads/debtService : null;
+    outstanding = Math.max(0, outstanding - principal);
+    const unleveredCF = revenue - opex - royalty - env - tax - capex + subsidyIn - sustaining - deltaWC - closure;
+    const leveredCF = unleveredCF + debtDraw - interest - principal;
+    cum += unleveredCF;
+    maxCumNeg = Math.min(maxCumNeg,cum);
+    rows.push({year,opYear,isOperation,product,price,revenue,opex,royalty,env,capex,subsidy:subsidyIn,sustaining,depreciation,tax,closure,deltaWC,ebitda,cfads,unleveredCF,debtDraw,interest,principal,debtService,dscr,outstanding,leveredCF,cum});
+  }
+  const flows = rows.map(r=>r.unleveredCF);
+  const leveredFlows = rows.map(r=>r.leveredCF);
+  const projectNpv = npv(inp.discount, flows);
+  const projectIrr = irr(flows);
+  const projectPayback = payback(flows);
+  const equityNpv = npv(inp.discount, leveredFlows);
+  const dscrValues = rows.filter(r=>r.isOperation && r.debtService>0 && isFinite(r.dscr)).map(r=>r.dscr);
+  const minDscr = dscrValues.length ? Math.min(...dscrValues) : null;
+  const totalRevenue=rows.reduce((s,r)=>s+r.revenue,0);
+  const totalOpex=rows.reduce((s,r)=>s+r.opex+r.royalty+r.env+r.sustaining+r.closure,0);
+  const totalTax=rows.reduce((s,r)=>s+r.tax,0);
+  const totalDebtService=rows.reduce((s,r)=>s+r.debtService,0);
+  const totalInterest=rows.reduce((s,r)=>s+r.interest,0);
+  const totalPrincipal=rows.reduce((s,r)=>s+r.principal,0);
+  const signal = projectNpv>0 && projectIrr!==null && projectIrr>inp.discount && (minDscr===null || minDscr>=1.2) ? 'Prijať' : (projectNpv>0 ? 'Preveriť' : 'Upraviť');
+  return {inp,rows,flows,leveredFlows,npv:projectNpv,irr:projectIrr,payback:projectPayback,equityNpv,minDscr,totalRevenue,totalOpex,totalTax,totalDebtService,totalInterest,totalPrincipal,debtPrincipal,equityContribution,signal,maxCumNeg};
+}
+function npv(rate,flows){ return flows.reduce((s,cf,t)=>s+cf/Math.pow(1+rate,t),0); }
+function irr(flows){
+  const hasPos=flows.some(x=>x>0), hasNeg=flows.some(x=>x<0);
+  if(!hasPos || !hasNeg) return null;
+  let lo=-0.95, hi=1.0;
+  function f(r){ return npv(r,flows); }
+  let flo=f(lo), fhi=f(hi);
+  let guard=0;
+  while(flo*fhi>0 && hi<100 && guard++<80){ hi*=2; fhi=f(hi); }
+  if(flo*fhi>0) return null;
+  for(let i=0;i<160;i++){
+    const mid=(lo+hi)/2, fm=f(mid);
+    if(Math.abs(fm)<1e-8) return mid;
+    if(flo*fm<=0){ hi=mid; fhi=fm; } else { lo=mid; flo=fm; }
+  }
+  return (lo+hi)/2;
+}
+function payback(flows){
+  let cum=0;
+  for(let i=0;i<flows.length;i++){
+    const prev=cum; cum+=flows[i];
+    if(cum>=0 && i>0){
+      const need=-prev; return (i-1) + (flows[i]!==0 ? need/flows[i] : 0);
+    }
+  }
+  return Infinity;
+}
+function cumulative(arr){ let s=0; return arr.map(v=>s+=Number(v)||0); }
+function recalc(silent=true){
+  const res=calculate(getInputs());
+  currentResult=res;
+  renderDashboard(res);
+  renderVariants();
+  if(!silent && activeTab==='inputs') setTab('dashboard');
+}
+function setTab(tab){
+  activeTab=tab;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+  document.querySelectorAll('.sheet').forEach(s=>s.classList.toggle('active',s.id===tab));
+  if(tab==='dashboard' && currentResult) renderDashboard(currentResult);
+  if(tab==='variants') renderVariants();
+}
+function renderDashboard(res){
+  $('dashTitle').textContent=`Analýza projektu: ${res.inp.projectName}`;
+  $('kpiNpv').textContent=fmtMil(res.npv);
+  $('kpiIrr').textContent=res.irr===null?'bez IRR':fmtPct(res.irr*100);
+  $('kpiPayback').textContent=isFinite(res.payback)?fmtNum(res.payback)+' roka':'bez návratnosti';
+  $('kpiDscr').textContent=res.minDscr===null?'bez úveru':fmtNum(res.minDscr);
+  $('kpiSignal').textContent=res.signal;
+  $('badgeCountry').textContent='Krajina: '+res.inp.countryName;
+  $('badgeDebt').textContent='Úver: '+fmtPct(res.inp.debtShare*100);
+  $('badgeDebtService').textContent='Dlhová služba: '+fmtMil(res.totalDebtService);
+  $('badgeLife').textContent='Životnosť: '+res.inp.life+' rokov';
+  const st=$('statusBadge'); st.className='status '+(res.signal==='Prijať'?'good':res.signal==='Preveriť'?'warn':'bad');
+  st.textContent=res.signal==='Prijať'?'Projekt vytvára hodnotu':res.signal==='Preveriť'?'Projekt vyžaduje preverenie':'Projekt treba upraviť';
+  const monthlyYear=$('monthlyYear'); monthlyYear.innerHTML='';
+  res.rows.filter(r=>r.isOperation).forEach(r=>{ const op=document.createElement('option'); op.value=r.year; op.textContent='Rok '+r.year; monthlyYear.appendChild(op); });
+  $('analysisText').innerHTML=analysisHTML(res);
+  renderPeriodCharts(res);
+  renderCashTable(res);
+}
+function analysisHTML(res){
+  const irrText=res.irr===null?'IRR nie je jednoznačne určiteľné, pretože peňažné toky neposkytujú platné riešenie.':`IRR je <b>${fmtPct(res.irr*100)}</b>. ${res.irr>res.inp.discount?'Prevyšuje požadovanú diskontnú sadzbu.':'Je pod alebo blízko požadovanej výnosnosti.'}`;
+  const dscrText=res.minDscr===null?'Projekt nepoužíva úver alebo v modeli nevzniká dlhová služba v prevádzke.':`Minimálne DSCR je <b>${fmtNum(res.minDscr)}</b>. ${res.minDscr>=1.2?'Schopnosť splácať úver je v základnom variante primeraná.':'Schopnosť splácať úver je slabá a vyžaduje úpravu financovania.'}`;
+  return `<p><b>Projektové hodnotenie:</b> NPV projektu je <b>${fmtMil(res.npv)}</b>, kapitálové NPV je <b>${fmtMil(res.equityNpv)}</b>. ${res.npv>0?'Projekt tvorí hodnotu pri zadaných predpokladoch.':'Projekt nevytvára požadovanú hodnotu.'}</p>
+  <p><b>Výnosnosť:</b> ${irrText}</p>
+  <p><b>Financovanie:</b> Modelový úver je <b>${fmtMil(res.debtPrincipal)}</b>, celková dlhová služba <b>${fmtMil(res.totalDebtService)}</b>. ${dscrText}</p>
+  <ul><li>Celkové tržby: <b>${fmtMil(res.totalRevenue)}</b></li><li>Kumulované prevádzkové a súvisiace náklady: <b>${fmtMil(res.totalOpex)}</b></li><li>Dane spolu: <b>${fmtMil(res.totalTax)}</b></li><li>Maximálna kumulatívna potreba kapitálu: <b>${fmtMil(Math.abs(res.maxCumNeg))}</b></li></ul>`;
+}
+function renderPeriodCharts(res){ activePeriod==='annual'?renderAnnualCharts(res):renderMonthlyCharts(res); }
+function colors(){ return ['#174a8b','#28a8c7','#12846f','#66e4c8','#0b3045']; }
+function renderAnnualCharts(res){
+  const labels=res.rows.map(r=>'R'+r.year);
+  drawGroupedBarLine('cashChart',[
+    {name:'Kumulované tržby',data:cumulative(res.rows.map(r=>r.revenue)),color:colors()[1]},
+    {name:'Kumulované náklady',data:cumulative(res.rows.map(r=>r.opex+r.royalty+r.env+r.tax+r.sustaining+r.closure)),color:colors()[2]},
+    {name:'Kumulovaný CAPEX netto',data:cumulative(res.rows.map(r=>Math.max(0,r.capex-r.subsidy))),color:colors()[0]}
+  ],{name:'Kumulovaný FCF',data:res.rows.map(r=>r.cum),color:colors()[4]},labels,'cashLegend');
+  renderCommonCharts(res);
+}
+function renderMonthlyCharts(res){
+  const y=parseInt($('monthlyYear').value)||res.inp.constructionYears;
+  const r=res.rows.find(x=>x.year===y) || res.rows.find(x=>x.isOperation) || res.rows[0];
+  const months=['Jan','Feb','Mar','Apr','Máj','Jún','Júl','Aug','Sep','Okt','Nov','Dec'];
+  drawGroupedBarLine('cashChart',[
+    {name:'Príjmy',data:Array(12).fill(r.revenue/12),color:colors()[1]},
+    {name:'Prevádzkové výdavky',data:Array(12).fill(-(r.opex+r.royalty+r.env+r.sustaining)/12),color:colors()[0]},
+    {name:'Dlhová služba',data:Array(12).fill(-r.debtService/12),color:colors()[2]}
+  ],{name:'Čistý tok',data:Array(12).fill(r.leveredCF/12),color:colors()[4]},months,'cashLegend');
+  renderCommonCharts(res,r);
+}
+function renderCommonCharts(res,monthRow=null){
+  const labels=res.rows.map(r=>'R'+r.year);
+  drawLine('cumChart',[{name:'Kumulovaný FCF',data:res.rows.map(r=>r.cum),color:colors()[0]}],labels,'cumLegend');
+  drawDoughnut('costChart',[
+    {name:'OPEX',value:res.rows.reduce((s,r)=>s+r.opex,0),color:colors()[1]},
+    {name:'CAPEX netto',value:res.rows.reduce((s,r)=>s+Math.max(0,r.capex-r.subsidy),0),color:colors()[0]},
+    {name:'Dane',value:res.totalTax,color:colors()[2]},
+    {name:'Dlhová služba',value:res.totalDebtService,color:colors()[4]},
+    {name:'Environment',value:res.rows.reduce((s,r)=>s+r.env+r.closure,0),color:colors()[3]}
+  ],'costLegend');
+  drawLine('trendChart',[
+    {name:'Kumulované tržby',data:cumulative(res.rows.map(r=>r.revenue)),color:colors()[1]},
+    {name:'Kumulovaná EBITDA',data:cumulative(res.rows.map(r=>r.ebitda)),color:colors()[2]}
+  ],labels,'trendLegend');
+  drawGroupedBarLine('debtChart',[
+    {name:'Kumulovaná istina',data:cumulative(res.rows.map(r=>r.principal)),color:colors()[0]},
+    {name:'Kumulované úroky',data:cumulative(res.rows.map(r=>r.interest)),color:colors()[2]}
+  ],{name:'Zostatok úveru',data:res.rows.map(r=>r.outstanding),color:colors()[4]},labels,'debtLegend');
+  const r=monthRow || res.rows.find(x=>x.isOperation) || res.rows[0];
+  drawBar('monthlyMixChart',[
+    {name:'Príjmy',value:r.revenue/12,color:colors()[1]},
+    {name:'Prevádzka',value:-(r.opex+r.royalty+r.env+r.sustaining)/12,color:colors()[0]},
+    {name:'Dane',value:-r.tax/12,color:colors()[2]},
+    {name:'Dlhová služba',value:-r.debtService/12,color:colors()[4]},
+    {name:'Čistý tok',value:r.leveredCF/12,color:colors()[3]}
+  ],'monthlyMixLegend');
+}
+function renderCashTable(res){
+  const headers=['Rok','Tržby','OPEX + poplatky','CAPEX netto','Dane','CFADS','Úroky','Istina','Dlhová služba','DSCR','Levered CF','Kumul. FCF','Zostatok úveru'];
+  let out='<thead><tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'</tr></thead><tbody>';
+  res.rows.forEach(r=>{
+    const capexNet=r.capex-r.subsidy, opexAll=r.opex+r.royalty+r.env;
+    out+=`<tr><td>Rok ${r.year}</td><td>${fmtMil(r.revenue)}</td><td class="negative">${fmtMil(-opexAll)}</td><td class="negative">${fmtMil(-capexNet)}</td><td class="negative">${fmtMil(-r.tax)}</td><td class="${r.cfads>=0?'positive':'negative'}">${fmtMil(r.cfads)}</td><td class="negative">${fmtMil(-r.interest)}</td><td class="negative">${fmtMil(-r.principal)}</td><td class="negative">${fmtMil(-r.debtService)}</td><td>${r.dscr===null?'—':fmtNum(r.dscr)}</td><td class="${r.leveredCF>=0?'positive':'negative'}">${fmtMil(r.leveredCF)}</td><td class="${r.cum>=0?'positive':'negative'}">${fmtMil(r.cum)}</td><td>${fmtMil(r.outstanding)}</td></tr>`;
+  });
+  $('cashTable').innerHTML=out+'</tbody>';
+}
+function scenarioInputs(name){
+  const b=getInputs();
+  if(name==='Pesimistický') return {...b,price:b.price*.90,capex:b.capex*1.10,opexTon:b.opexTon*1.08,fixedOpex:b.fixedOpex*1.08,recovery:Math.max(0,b.recovery-.03),discount:b.discount+.01,interest:b.interest+.005};
+  if(name==='Optimistický') return {...b,price:b.price*1.10,capex:b.capex*.96,opexTon:b.opexTon*.95,fixedOpex:b.fixedOpex*.96,recovery:Math.min(1,b.recovery+.025),discount:Math.max(.001,b.discount-.005),interest:Math.max(0,b.interest-.003)};
+  return {...b};
+}
+function renderVariants(){
+  const names=['Pesimistický','Realistický','Optimistický'];
+  const results=names.map(name=>({name,result:calculate(scenarioInputs(name))}));
+  $('variantCards').innerHTML=results.map(({name,result})=>{
+    const cls=result.signal==='Prijať'?'good':result.signal==='Preveriť'?'warn':'bad';
+    return `<div class="variant-card"><h3>${name}</h3><div class="status ${cls}">${result.signal}</div><div class="variant-metrics"><div class="metric"><span>NPV projektu</span><strong>${fmtMil(result.npv)}</strong></div><div class="metric"><span>NPV kapitálu</span><strong>${fmtMil(result.equityNpv)}</strong></div><div class="metric"><span>IRR</span><strong>${result.irr===null?'—':fmtPct(result.irr*100)}</strong></div><div class="metric"><span>Min. DSCR</span><strong>${result.minDscr===null?'—':fmtNum(result.minDscr)}</strong></div></div></div>`;
+  }).join('');
+  drawGroupedBar('variantNpvChart',[
+    {name:'NPV projektu',data:results.map(x=>x.result.npv),color:colors()[0]},
+    {name:'NPV kapitálu',data:results.map(x=>x.result.equityNpv),color:colors()[2]}
+  ],names,'variantNpvLegend');
+  drawGroupedBarLine('variantIrrChart',[
+    {name:'IRR (%)',data:results.map(x=>x.result.irr===null?0:x.result.irr*100),color:colors()[1]}
+  ],{name:'Min. DSCR',data:results.map(x=>x.result.minDscr===null?0:x.result.minDscr),color:colors()[4]},names,'variantIrrLegend');
+  drawGroupedBar('variantStackChart',[
+    {name:'Tržby spolu',data:results.map(x=>x.result.totalRevenue),color:colors()[1]},
+    {name:'Náklady + dane',data:results.map(x=>x.result.totalOpex+x.result.totalTax),color:colors()[2]},
+    {name:'Dlhová služba',data:results.map(x=>x.result.totalDebtService),color:colors()[4]}
+  ],names,'variantStackLegend');
+  drawGroupedBar('variantDebtChart',[
+    {name:'CAPEX brutto',data:results.map(x=>x.result.inp.capex*(1+x.result.inp.contingency)),color:colors()[0]},
+    {name:'Istina',data:results.map(x=>x.result.totalPrincipal),color:colors()[2]},
+    {name:'Úroky',data:results.map(x=>x.result.totalInterest),color:colors()[4]}
+  ],names,'variantDebtLegend');
+  renderVariantTable(results);
+}
+function renderVariantTable(results){
+  const headers=['Scenár','NPV projektu','NPV kapitálu','IRR','Min. DSCR','Tržby spolu','Náklady + dane','Dlhová služba','Signál'];
+  let out='<thead><tr>'+headers.map(h=>`<th>${h}</th>`).join('')+'</tr></thead><tbody>';
+  results.forEach(({name,result})=>{
+    out+=`<tr><td>${name}</td><td class="${result.npv>=0?'positive':'negative'}">${fmtMil(result.npv)}</td><td class="${result.equityNpv>=0?'positive':'negative'}">${fmtMil(result.equityNpv)}</td><td>${result.irr===null?'—':fmtPct(result.irr*100)}</td><td>${result.minDscr===null?'—':fmtNum(result.minDscr)}</td><td>${fmtMil(result.totalRevenue)}</td><td>${fmtMil(result.totalOpex+result.totalTax)}</td><td>${fmtMil(result.totalDebtService)}</td><td>${result.signal}</td></tr>`;
+  });
+  $('variantTable').innerHTML=out+'</tbody>';
+}
+function minmax(series){
+  const vals=series.flatMap(s=>s.data!==undefined?s.data:[s.value]).filter(v=>isFinite(v));
+  let mn=Math.min(0,...vals), mx=Math.max(0,...vals);
+  if(mn===mx){ mx=mn+1; }
+  const pad=(mx-mn)*.10; return {mn:mn-pad,mx:mx+pad};
+}
+function makeSvg(containerId){
+  const el=$(containerId); el.innerHTML='';
+  const w=el.clientWidth||600,h=el.clientHeight||300;
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('viewBox',`0 0 ${w} ${h}`); svg.setAttribute('class','chart');
+  el.appendChild(svg); return {svg,w,h};
+}
+function gradientFill(svg,idx){
+  const pairs=[
+    ['#174a8b','#28a8c7'],
+    ['#12846f','#66e4c8'],
+    ['#0b3045','#174a8b'],
+    ['#28a8c7','#66e4c8'],
+    ['#174a8b','#12846f']
+  ];
+  const id='g'+idx+'_'+Math.random().toString(36).slice(2);
+  const defs=svg.querySelector('defs') || document.createElementNS(svg.namespaceURI,'defs');
+  if(!defs.parentNode) svg.appendChild(defs);
+  const lg=document.createElementNS(svg.namespaceURI,'linearGradient');
+  lg.setAttribute('id',id); lg.setAttribute('x1','0%'); lg.setAttribute('y1','0%'); lg.setAttribute('x2','100%'); lg.setAttribute('y2','100%');
+  const s1=document.createElementNS(svg.namespaceURI,'stop'); s1.setAttribute('offset','0%'); s1.setAttribute('stop-color',pairs[idx%pairs.length][0]);
+  const s2=document.createElementNS(svg.namespaceURI,'stop'); s2.setAttribute('offset','100%'); s2.setAttribute('stop-color',pairs[idx%pairs.length][1]);
+  lg.appendChild(s1); lg.appendChild(s2); defs.appendChild(lg);
+  return 'url(#'+id+')';
+}
+function setLegend(id,items){
+  const el=$(id); if(!el) return;
+  el.innerHTML=items.map(i=>`<span><i style="background:${i.color}"></i>${i.name}</span>`).join('');
+}
+function drawAxes(svg,w,h,m,scale,labels){
+  for(let i=0;i<=4;i++){
+    const y=m.t+(h-m.t-m.b)*i/4;
+    const line=document.createElementNS(svg.namespaceURI,'line'); line.setAttribute('x1',m.l); line.setAttribute('x2',w-m.r); line.setAttribute('y1',y); line.setAttribute('y2',y); line.setAttribute('class','axis'); svg.appendChild(line);
+    const val=scale.mx-(scale.mx-scale.mn)*i/4;
+    const txt=document.createElementNS(svg.namespaceURI,'text'); txt.setAttribute('x',m.l-8); txt.setAttribute('y',y+4); txt.setAttribute('text-anchor','end'); txt.setAttribute('class','axis-text'); txt.textContent=fmtNum(val,0); svg.appendChild(txt);
+  }
+  labels.forEach((lab,i)=>{ if(i%Math.ceil(labels.length/8)!==0) return; const x=m.l+(w-m.l-m.r)*(i+.5)/labels.length; const t=document.createElementNS(svg.namespaceURI,'text'); t.setAttribute('x',x); t.setAttribute('y',h-8); t.setAttribute('text-anchor','middle'); t.setAttribute('class','axis-text'); t.textContent=lab; svg.appendChild(t); });
+}
+function drawGroupedBar(id,series,labels,legendId){
+  const {svg,w,h}=makeSvg(id), m={l:58,r:18,t:16,b:38}, scale=minmax(series);
+  const y=v=>m.t+(scale.mx-v)/(scale.mx-scale.mn)*(h-m.t-m.b);
+  drawAxes(svg,w,h,m,scale,labels);
+  const groupW=(w-m.l-m.r)/labels.length, barW=Math.max(4,groupW/(series.length+1.2));
+  labels.forEach((_,i)=>series.forEach((s,j)=>{
+    const v=s.data[i]||0, x=m.l+i*groupW+(j+.55)*barW, yy=Math.min(y(0),y(v)), bh=Math.abs(y(v)-y(0));
+    const r=document.createElementNS(svg.namespaceURI,'rect');
+    r.setAttribute('x',x); r.setAttribute('y',yy); r.setAttribute('width',barW*.82); r.setAttribute('height',Math.max(1,bh)); r.setAttribute('rx',5);
+    r.setAttribute('fill',gradientFill(svg,j)); r.setAttribute('opacity',.92); svg.appendChild(r);
+  }));
+  setLegend(legendId,series);
+}
+function drawGroupedBarLine(id,bars,line,labels,legendId){
+  const {svg,w,h}=makeSvg(id), m={l:58,r:18,t:16,b:38}, scale=minmax([...bars,{data:line.data}]);
+  const y=v=>m.t+(scale.mx-v)/(scale.mx-scale.mn)*(h-m.t-m.b);
+  const xLine=i=>m.l+(w-m.l-m.r)*(i+.5)/labels.length;
+  drawAxes(svg,w,h,m,scale,labels);
+  const groupW=(w-m.l-m.r)/labels.length, barW=Math.max(4,groupW/(bars.length+1.2));
+  labels.forEach((_,i)=>bars.forEach((s,j)=>{
+    const v=s.data[i]||0, x=m.l+i*groupW+(j+.55)*barW, yy=Math.min(y(0),y(v)), bh=Math.abs(y(v)-y(0));
+    const r=document.createElementNS(svg.namespaceURI,'rect');
+    r.setAttribute('x',x); r.setAttribute('y',yy); r.setAttribute('width',barW*.82); r.setAttribute('height',Math.max(1,bh)); r.setAttribute('rx',5);
+    r.setAttribute('fill',gradientFill(svg,j)); r.setAttribute('opacity',.92); svg.appendChild(r);
+  }));
+  const points=line.data.map((v,i)=>`${xLine(i)},${y(v)}`).join(' ');
+  const pl=document.createElementNS(svg.namespaceURI,'polyline');
+  pl.setAttribute('points',points); pl.setAttribute('fill','none'); pl.setAttribute('stroke',line.color); pl.setAttribute('stroke-width','3');
+  pl.setAttribute('stroke-linecap','round'); pl.setAttribute('stroke-linejoin','round'); svg.appendChild(pl);
+  line.data.forEach((v,i)=>{ const c=document.createElementNS(svg.namespaceURI,'circle'); c.setAttribute('cx',xLine(i)); c.setAttribute('cy',y(v)); c.setAttribute('r',3); c.setAttribute('fill',line.color); svg.appendChild(c); });
+  setLegend(legendId,[...bars,line]);
+}
+function drawLine(id,series,labels,legendId){
+  const {svg,w,h}=makeSvg(id), m={l:58,r:18,t:16,b:38}, scale=minmax(series);
+  const x=i=>m.l+(w-m.l-m.r)*(i+.5)/labels.length, y=v=>m.t+(scale.mx-v)/(scale.mx-scale.mn)*(h-m.t-m.b);
+  drawAxes(svg,w,h,m,scale,labels);
+  series.forEach(s=>{ const p=s.data.map((v,i)=>`${x(i)},${y(v)}`).join(' '); const pl=document.createElementNS(svg.namespaceURI,'polyline'); pl.setAttribute('points',p); pl.setAttribute('fill','none'); pl.setAttribute('stroke',s.color); pl.setAttribute('stroke-width','3'); pl.setAttribute('stroke-linecap','round'); pl.setAttribute('stroke-linejoin','round'); svg.appendChild(pl); });
+  setLegend(legendId,series);
+}
+function drawBar(id,items,legendId){
+  drawGroupedBar(id,[{name:'Mesačný priemer',data:items.map(x=>x.value),color:colors()[0]}],items.map(x=>x.name),'');
+  setLegend(legendId,items.map(x=>({name:x.name,color:x.color})));
+}
+function drawDoughnut(id,items,legendId){
+  const {svg,w,h}=makeSvg(id), cx=w/2, cy=h/2, r=Math.min(w,h)*.34, inner=r*.56, total=items.reduce((s,i)=>s+Math.max(0,i.value),0)||1; let a=-Math.PI/2;
+  items.forEach(it=>{ const val=Math.max(0,it.value), da=val/total*2*Math.PI, a2=a+da; const large=da>Math.PI?1:0;
+    const x1=cx+r*Math.cos(a), y1=cy+r*Math.sin(a), x2=cx+r*Math.cos(a2), y2=cy+r*Math.sin(a2), xi1=cx+inner*Math.cos(a), yi1=cy+inner*Math.sin(a), xi2=cx+inner*Math.cos(a2), yi2=cy+inner*Math.sin(a2);
+    const path=document.createElementNS(svg.namespaceURI,'path');
+    path.setAttribute('d',`M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} L ${xi2} ${yi2} A ${inner} ${inner} 0 ${large} 0 ${xi1} ${yi1} Z`);
+    path.setAttribute('fill',gradientFill(svg,items.indexOf(it))); path.setAttribute('opacity','.90'); svg.appendChild(path); a=a2;
+  });
+  const t=document.createElementNS(svg.namespaceURI,'text'); t.setAttribute('x',cx); t.setAttribute('y',cy+5); t.setAttribute('text-anchor','middle'); t.setAttribute('class','axis-text'); t.textContent='štruktúra'; svg.appendChild(t);
+  setLegend(legendId,items);
+}
+function exportRows(res){ return res.rows.map(r=>({Rok:r.year,Trzby:r.revenue,OPEX_poplatky_env:r.opex+r.royalty+r.env,CAPEX_netto:r.capex-r.subsidy,Dane:r.tax,CFADS:r.cfads,Uroky:r.interest,Istina:r.principal,Dlhova_sluzba:r.debtService,DSCR:r.dscr||'',Levered_CF:r.leveredCF,Kumulovany_FCF:r.cum,Zostatok_uveru:r.outstanding})); }
+function inputSheetRows(res){
+  const inp=res.inp;
+  return [
+    ['Položka','Hodnota'],
+    ['Autor','Ing. Maksym Mykhei'],
+    ['Poznámka','Len ukážka pre cvičenia — výstupy slúžia na výučbu metodiky a nenahrádzajú odbornú štúdiu projektu.'],
+    ['Dátum exportu',new Date().toLocaleString('sk-SK')],
+    ['Názov projektu',inp.projectName],['Krajina',inp.countryName],['Ročná ťažba rudy kt',inp.ore],['Životnosť roky',inp.life],
+    ['Obsah úžitkovej zložky %',inp.grade*100],['Výťažnosť %',inp.recovery*100],['Zaplatený podiel %',inp.payable*100],['Cena produktu EUR/t',inp.price],['Rast ceny ročne %',inp.priceGrowth*100],
+    ['CAPEX mil. EUR',inp.capex],['Contingency %',inp.contingency*100],['Dotácia / grant mil. EUR',inp.subsidy],['Výstavba roky',inp.constructionYears],
+    ['OPEX variabilný EUR/t rudy',inp.opexTon],['Fixný OPEX mil. EUR/rok',inp.fixedOpex],['Sustaining CAPEX mil. EUR/rok',inp.sustCapex],['Environmentálne náklady mil. EUR/rok',inp.envCost],['Uzatvorenie bane mil. EUR',inp.closureCost],
+    ['Pracovný kapitál z tržieb %',inp.wcRate*100],['Inflácia nákladov %',inp.inflation*100],['Daň zo zisku %',inp.taxRate*100],['Royalty / poplatok z tržieb %',inp.royalty*100],['Diskontná sadzba %',inp.discount*100],['Odpisovanie CAPEX roky',inp.deprYears],
+    ['Podiel úveru z netto CAPEX %',inp.debtShare*100],['Úroková sadzba %',inp.interest*100],['Splatnosť úveru roky',inp.debtTerm],['Odklad splátok istiny roky po výstavbe',inp.grace]
+  ];
+}
+function dashboardRows(res){
+  return [
+    ['Ukazovateľ','Hodnota'],
+    ['NPV projektu mil. EUR',res.npv],['NPV kapitálu mil. EUR',res.equityNpv],['IRR %',res.irr===null?'':res.irr*100],['Jednoduchá návratnosť roky',isFinite(res.payback)?res.payback:''],
+    ['Minimálne DSCR',res.minDscr===null?'':res.minDscr],['Rozhodovací signál',res.signal],['Modelový úver mil. EUR',res.debtPrincipal],['Vlastný kapitál mil. EUR',res.equityContribution],
+    ['Celkové tržby mil. EUR',res.totalRevenue],['Kumulované náklady mil. EUR',res.totalOpex],['Dane spolu mil. EUR',res.totalTax],['Dlhová služba spolu mil. EUR',res.totalDebtService],['Úroky spolu mil. EUR',res.totalInterest],['Splatená istina mil. EUR',res.totalPrincipal],['Max. kumulatívna potreba kapitálu mil. EUR',Math.abs(res.maxCumNeg)]
+  ];
+}
+function annualRows(res,scenarioName='Základný'){
+  const header=['Scenár','Rok','Prevádzkový rok','Tržby','Produkt t','Cena EUR/t','OPEX','Royalty','Environment','CAPEX','Dotácia','Sustaining CAPEX','Dane','Uzatvorenie','Zmena pracovného kapitálu','EBITDA','CFADS','Voľný CF','Čerpanie úveru','Úroky','Istina','Dlhová služba','DSCR','Levered CF','Kumulovaný FCF','Zostatok úveru'];
+  return [header,...res.rows.map(r=>[scenarioName,r.year,r.isOperation?r.opYear:'',r.revenue,r.product,r.price,r.opex,r.royalty,r.env,r.capex,r.subsidy,r.sustaining,r.tax,r.closure,r.deltaWC,r.ebitda,r.cfads,r.unleveredCF,r.debtDraw,r.interest,r.principal,r.debtService,r.dscr===null?'':r.dscr,r.leveredCF,r.cum,r.outstanding])];
+}
+function monthlyRows(res,scenarioName='Základný'){
+  const months=['Január','Február','Marec','Apríl','Máj','Jún','Júl','August','September','Október','November','December'];
+  const header=['Scenár','Rok','Prevádzkový rok','Mesiac','Tržby','OPEX','Royalty','Environment','CAPEX','Dotácia','Sustaining CAPEX','Dane','Uzatvorenie','Zmena pracovného kapitálu','CFADS','Voľný CF','Čerpanie úveru','Úroky','Istina','Dlhová služba','DSCR','Levered CF','Zostatok úveru'];
+  const rows=[header];
+  res.rows.forEach(r=>{
+    months.forEach((m,idx)=>{
+      rows.push([scenarioName,r.year,r.isOperation?r.opYear:'',idx+1+' '+m,r.revenue/12,r.opex/12,r.royalty/12,r.env/12,r.capex/12,r.subsidy/12,r.sustaining/12,r.tax/12,r.closure/12,r.deltaWC/12,r.cfads/12,r.unleveredCF/12,r.debtDraw/12,r.interest/12,r.principal/12,r.debtService/12,r.dscr===null?'':r.dscr,r.leveredCF/12,r.outstanding]);
+    });
+  });
+  return rows;
+}
+function variantSummaryRows(){
+  const names=['Pesimistický','Realistický','Optimistický'];
+  const header=['Scenár','NPV projektu','NPV kapitálu','IRR %','Min. DSCR','Návratnosť roky','Tržby spolu','Náklady spolu','Dane','Dlhová služba','Úroky','Istina','Signál'];
+  return [header,...names.map(n=>{const r=calculate(scenarioInputs(n)); return [n,r.npv,r.equityNpv,r.irr===null?'':r.irr*100,r.minDscr===null?'':r.minDscr,isFinite(r.payback)?r.payback:'',r.totalRevenue,r.totalOpex,r.totalTax,r.totalDebtService,r.totalInterest,r.totalPrincipal,r.signal];})];
+}
+function variantAnnualRows(){
+  const names=['Pesimistický','Realistický','Optimistický'];
+  let rows=[];
+  names.forEach((n,i)=>{ const r=annualRows(calculate(scenarioInputs(n)),n); rows = rows.concat(i===0?r:r.slice(1)); });
+  return rows;
+}
+function variantMonthlyRows(){
+  const names=['Pesimistický','Realistický','Optimistický'];
+  let rows=[];
+  names.forEach((n,i)=>{ const r=monthlyRows(calculate(scenarioInputs(n)),n); rows = rows.concat(i===0?r:r.slice(1)); });
+  return rows;
+}
+function xmlEsc(v){ return String(v===undefined||v===null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function excelCell(v){
+  const isNum=typeof v==='number' && isFinite(v);
+  return `<Cell><Data ss:Type="${isNum?'Number':'String'}">${xmlEsc(isNum?String(v):v)}</Data></Cell>`;
+}
+function excelSheet(name,rows){
+  const safeName=String(name).replace(/[\/?*\[\]:]/g,' ').slice(0,31);
+  return `<Worksheet ss:Name="${xmlEsc(safeName)}"><Table>${rows.map(row=>'<Row>'+row.map(excelCell).join('')+'</Row>').join('')}</Table><WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel"><DisplayGridlines/></WorksheetOptions></Worksheet>`;
+}
+function workbookXml(sheets){
+  return `<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><DocumentProperties xmlns="urn:schemas-microsoft-com:office:office"><Author>Ing. Maksym Mykhei</Author><Created>${new Date().toISOString()}</Created></DocumentProperties><Styles><Style ss:ID="Default" ss:Name="Normal"><Alignment ss:Vertical="Center"/><Font ss:FontName="Calibri" ss:Size="11"/></Style></Styles>${sheets.map(s=>excelSheet(s.name,s.rows)).join('')}</Workbook>`;
+}
+function exportExcelWorkbook(name='ekonomicky_model_vystupy.xls'){
+  if(!currentResult) currentResult=calculate(getInputs());
+  const res=currentResult;
+  const sheets=[
+    {name:'Vstupy',rows:inputSheetRows(res)},
+    {name:'Dashboard',rows:dashboardRows(res)},
+    {name:'Rocne_CF',rows:annualRows(res,'Základný')},
+    {name:'Mesacne_CF',rows:monthlyRows(res,'Základný')},
+    {name:'Varianty',rows:variantSummaryRows()},
+    {name:'Varianty_rocne',rows:variantAnnualRows()},
+    {name:'Varianty_mesacne',rows:variantMonthlyRows()}
+  ];
+  downloadText(workbookXml(sheets), name, 'application/vnd.ms-excel;charset=utf-8');
+}
+function getFormState(){
+  const state={};
+  document.querySelectorAll('#inputs input, #inputs select').forEach(el=>{ if(el.id) state[el.id]=el.value; });
+  return state;
+}
+function saveJsonModel(){
+  const data={
+    type:'kalkulacka_ekonomiky_zemskych_zdrojov',
+    version:'1.2',
+    savedAt:new Date().toISOString(),
+    author:'Ing. Maksym Mykhei',
+    inputs:getFormState()
+  };
+  const name=((data.inputs.projectName||'projekt').toLowerCase().replace(/[^a-z0-9áäčďéíĺľňóôŕšťúýž]+/gi,'-').replace(/^-|-$/g,'')||'projekt')+'_model.json';
+  downloadText(JSON.stringify(data,null,2), name, 'application/json;charset=utf-8');
+}
+function normalizeImportedState(input){
+  const raw=input.inputs || input.state || input.model || input;
+  const state={...raw};
+  if(state.countryCode && !state.country) state.country=state.countryCode;
+  const pct=['grade','recovery','payable','priceGrowth','contingency','wcRate','inflation','taxRate','royalty','discount','debtShare','interest'];
+  pct.forEach(k=>{
+    if(state[k]!==undefined){
+      const n=parseFloat(state[k]);
+      if(isFinite(n) && Math.abs(n)<=1) state[k]=String(n*100);
+    }
+  });
+  return state;
+}
+function applyImportedState(state){
+  Object.entries(state).forEach(([id,value])=>{ if($(id) && value!==undefined && value!==null) $(id).value=value; });
+  if($('country').value && countries[$('country').value]){
+    document.querySelectorAll('.country-card').forEach(c=>c.classList.toggle('active',c.dataset.country===$('country').value));
+  }
+  recalc(false);
+  setTab('dashboard');
+}
+function loadJsonModel(event){
+  const file=event.target.files && event.target.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const data=JSON.parse(String(reader.result||''));
+      const state=normalizeImportedState(data);
+      applyImportedState(state);
+    }catch(err){
+      alert('JSON súbor sa nepodarilo načítať: '+err.message);
+    }
+  };
+  reader.readAsText(file,'utf-8');
+}
+function preparePrintClone(sourceId){
+  const source=$(sourceId);
+  const clone=source.cloneNode(true);
+  clone.querySelectorAll('button,.toolbar,.export-actions').forEach(el=>el.remove());
+  // SVG grafy sa pre PDF fixujú na explicitnú veľkosť, aby v tlači neostali prázdne.
+  clone.querySelectorAll('.chart-wrap').forEach(cw=>{
+    const originalId=cw.id;
+    const original=originalId ? $(originalId) : null;
+    if(original){ cw.innerHTML=original.innerHTML; }
+    const svg=cw.querySelector('svg');
+    if(svg){
+      svg.setAttribute('xmlns','http://www.w3.org/2000/svg');
+      if(!svg.getAttribute('viewBox')) svg.setAttribute('viewBox','0 0 900 360');
+      svg.setAttribute('width','100%');
+      svg.setAttribute('height','100%');
+      svg.setAttribute('preserveAspectRatio','xMidYMid meet');
+      svg.style.width='100%';
+      svg.style.height='100%';
+      svg.style.display='block';
+    }
+  });
+  clone.querySelectorAll('.sheet').forEach(s=>s.classList.add('active'));
+  return clone;
+}
+function exportPdf(type){
+  const isVariants=type.startsWith('variants');
+  if(isVariants){ setTab('variants'); renderVariants(); }
+  else { setTab('dashboard'); if(currentResult) renderDashboard(currentResult); }
+  const sourceId=isVariants?'variantsExport':'dashboardExport';
+  const title=isVariants?'Scenárová analýza variantov':'Dashboard ekonomickej analýzy projektu';
+  // krátke oneskorenie umožní prekresliť SVG pred klonovaním
+  setTimeout(()=>{
+    const clone=preparePrintClone(sourceId);
+    const css=document.querySelector('style').textContent;
+    const printCss=`
+      @page{size:A4 landscape;margin:10mm}
+      html,body{margin:0;background:#ffffff;color:#0b2436;font-family:Inter,'Segoe UI',Roboto,Arial,sans-serif;}
+      .print-page{padding:0;background:#ffffff;}
+      .print-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin:0 0 10px;padding:12px 14px;border-radius:18px;background:linear-gradient(135deg,#174a8b,#12846f,#66e4c8);color:#fff;break-inside:avoid;}
+      .print-head h1{margin:0;font-size:24px;line-height:1.1;letter-spacing:-.02em;color:#fff;}
+      .print-head p{margin:5px 0 0;font-size:11px;opacity:.92;}
+      .notice,.hero,.tabs,#inputs,.toolbar,.btn,.export-actions{display:none!important;}
+      .sheet{display:block!important;}
+      .kpi-grid{display:grid!important;grid-template-columns:repeat(5,1fr)!important;gap:7px!important;margin-bottom:8px!important;}
+      .dashboard-grid,.chart-grid,.layout{display:grid!important;grid-template-columns:1fr!important;gap:9px!important;}
+      .dashboard-grid{grid-template-columns:1.15fr .85fr!important;align-items:start!important;}
+      .chart-grid{grid-template-columns:repeat(2,1fr)!important;}
+      .variant-cards{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:8px!important;}
+      .card,.chart-card,.kpi,.variant-card{box-shadow:none!important;border:1px solid #d9eee9!important;background:#fff!important;break-inside:avoid;page-break-inside:avoid;margin-bottom:8px!important;}
+      .card{padding:10px!important;border-radius:14px!important;}
+      .chart-card{padding:10px!important;border-radius:14px!important;}
+      .kpi{padding:9px!important;border-radius:13px!important;}
+      .kpi strong{font-size:16px!important;}
+      h2{font-size:18px!important;} h3{font-size:13px!important;margin-bottom:6px!important;}
+      .analysis{position:static!important;max-height:none!important;overflow:visible!important;}
+      .analysis p,.analysis li{font-size:10px!important;line-height:1.35!important;}
+      .chart-wrap{height:185px!important;min-height:185px!important;width:100%!important;display:block!important;}
+      .chart-wrap.big{height:245px!important;min-height:245px!important;}
+      svg.chart{width:100%!important;height:100%!important;display:block!important;overflow:visible!important;}
+      .legend{font-size:9px!important;gap:6px!important;margin-top:4px!important;}
+      table{font-size:7.2px!important;width:100%!important;white-space:nowrap!important;}
+      th,td{padding:3px 4px!important;}
+      .table-wrap{max-height:none!important;overflow:visible!important;}
+      *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+    `;
+    const win=window.open('','_blank');
+    if(!win){
+      document.body.classList.add(isVariants?'print-variants':'print-dashboard');
+      setTimeout(()=>window.print(),200);
+      return;
+    }
+    win.document.open();
+    win.document.write(`<!DOCTYPE html><html lang="sk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title><style>${css}\n${printCss}</style></head><body><div class="print-page"><div class="print-head"><div><h1>${title}</h1><p>Len ukážka pre cvičenia — výstupy slúžia na výučbu metodiky a nenahrádzajú odbornú štúdiu projektu.</p></div><div style="font-size:11px;font-weight:800;text-align:right">Autor: Ing. Maksym Mykhei<br>${new Date().toLocaleDateString('sk-SK')}</div></div>${clone.outerHTML}</div><script>window.addEventListener('load',()=>setTimeout(()=>{window.focus();window.print();},700));<\/script></body></html>`);
+    win.document.close();
+  },220);
+}
+window.addEventListener('afterprint' ,()=>{ document.body.classList.remove('print-dashboard','print-variants'); });
+function handleExport(type){
+  if(!currentResult) recalc();
+  if(type.includes('csv')){
+    const rows = type.startsWith('variants') ? variantExportRows() : exportRows(currentResult);
+    downloadText(rowsToCsv(rows), type+'.csv', 'text/csv;charset=utf-8');
+  } else if(type.includes('xls')){
+    exportExcelWorkbook(type.startsWith('variants')?'varianty_a_vystupy_modelu.xls':'dashboard_a_vystupy_modelu.xls');
+  } else if(type.includes('png')){
+    exportPng(type.startsWith('variants')?'variantsExport':'dashboardExport', type+'.png');
+  }
+}
+function variantExportRows(){
+  return ['Pesimistický','Realistický','Optimistický'].map(n=>{ const r=calculate(scenarioInputs(n)); return {Scenar:n,NPV_projektu:r.npv,NPV_kapitalu:r.equityNpv,IRR:r.irr||'',Min_DSCR:r.minDscr||'',Trzby:r.totalRevenue,Naklady_dane:r.totalOpex+r.totalTax,Dlhova_sluzba:r.totalDebtService,Signal:r.signal}; });
+}
+function rowsToCsv(rows){ const keys=Object.keys(rows[0]||{}); return keys.join(';')+'\n'+rows.map(r=>keys.map(k=>String(r[k]).replaceAll(';',',')).join(';')).join('\n'); }
+function rowsToHtmlTable(rows){ const keys=Object.keys(rows[0]||{}); return '<table><tr>'+keys.map(k=>'<th>'+k+'</th>').join('')+'</tr>'+rows.map(r=>'<tr>'+keys.map(k=>'<td>'+r[k]+'</td>').join('')+'</tr>').join('')+'</table>'; }
+function downloadText(content,name,mime){ const blob=new Blob([content],{type:mime}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); }
+async function svgToImage(svgEl, width=760, height=360){
+  const clone=svgEl.cloneNode(true);
+  clone.setAttribute('xmlns','http://www.w3.org/2000/svg');
+  clone.setAttribute('width',width);
+  clone.setAttribute('height',height);
+  if(!clone.getAttribute('viewBox')) clone.setAttribute('viewBox','0 0 '+width+' '+height);
+  clone.setAttribute('preserveAspectRatio','xMidYMid meet');
+  const data=new XMLSerializer().serializeToString(clone);
+  const blob=new Blob([data],{type:'image/svg+xml;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  try{
+    const img=new Image();
+    await new Promise((resolve,reject)=>{ img.onload=resolve; img.onerror=reject; img.src=url; });
+    return img;
+  } finally {
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+}
+function roundRect(ctx,x,y,w,h,r){
+  const rr=Math.min(r,w/2,h/2);
+  ctx.beginPath();
+  ctx.moveTo(x+rr,y); ctx.arcTo(x+w,y,x+w,y+h,rr); ctx.arcTo(x+w,y+h,x,y+h,rr); ctx.arcTo(x,y+h,x,y,rr); ctx.arcTo(x,y,x+w,y,rr); ctx.closePath();
+}
+function canvasGradient(ctx,x,y,w,h){
+  const g=ctx.createLinearGradient(x,y,x+w,y+h);
+  g.addColorStop(0,'#174a8b'); g.addColorStop(.55,'#12846f'); g.addColorStop(1,'#66e4c8');
+  return g;
+}
+async function exportPng(id,name){
+  if(!currentResult) recalc();
+  const isVariants=id==='variantsExport';
+  if(isVariants){ setTab('variants'); renderVariants(); }
+  else { setTab('dashboard'); renderDashboard(currentResult); }
+  await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+  const cards=[...document.querySelectorAll('#'+id+' .chart-card')].filter(card=>card.querySelector('svg'));
+  if(!cards.length){ alert('Nie sú dostupné grafy na export. Najprv prepočítajte model.'); return; }
+  const scale=2;
+  const W=1600, margin=50, gap=30, headerH=120, footerH=42;
+  const cols=2, cardW=(W-margin*2-gap)/cols, chartH=330, titleH=44, cardH=chartH+titleH+34;
+  const rows=Math.ceil(cards.length/cols);
+  const H=headerH + rows*cardH + (rows-1)*gap + margin + footerH;
+  const canvas=document.createElement('canvas'); canvas.width=W*scale; canvas.height=H*scale;
+  const ctx=canvas.getContext('2d'); ctx.scale(scale,scale);
+  ctx.fillStyle='#f8fffd'; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle=canvasGradient(ctx,0,0,W,headerH); roundRect(ctx,margin,28,W-margin*2,78,24); ctx.fill();
+  ctx.fillStyle='#ffffff'; ctx.font='800 34px Inter, Segoe UI, Arial, sans-serif'; ctx.fillText(isVariants?'Grafy scenárovej analýzy':'Grafy dashboardu ekonomickej analýzy',margin+28,68);
+  ctx.font='700 16px Inter, Segoe UI, Arial, sans-serif'; ctx.fillText('Autor: Ing. Maksym Mykhei · '+new Date().toLocaleDateString('sk-SK'),margin+28,94);
+  for(let i=0;i<cards.length;i++){
+    const card=cards[i], col=i%cols, row=Math.floor(i/cols);
+    const x=margin+col*(cardW+gap), y=headerH+row*(cardH+gap);
+    ctx.fillStyle='#ffffff'; roundRect(ctx,x,y,cardW,cardH,24); ctx.fill();
+    ctx.strokeStyle='#d6eee9'; ctx.lineWidth=1.4; ctx.stroke();
+    const title=(card.querySelector('h3')?.textContent||'Graf '+(i+1)).trim();
+    ctx.fillStyle='#0b3045'; ctx.font='800 21px Inter, Segoe UI, Arial, sans-serif'; ctx.fillText(title,x+22,y+31);
+    const svg=card.querySelector('svg');
+    const img=await svgToImage(svg,760,330);
+    ctx.drawImage(img,x+18,y+titleH,cardW-36,chartH);
+  }
+  ctx.fillStyle='#587384'; ctx.font='700 13px Inter, Segoe UI, Arial, sans-serif';
+  ctx.fillText('Len ukážka pre cvičenia — výstupy slúžia na výučbu metodiky a nenahrádzajú odbornú štúdiu projektu.',margin,H-22);
+  const a=document.createElement('a'); a.download=name; a.href=canvas.toDataURL('image/png'); a.click();
+}
+window.addEventListener('resize',()=>{ if(currentResult){ renderDashboard(currentResult); if(activeTab==='variants') renderVariants(); }});
+document.addEventListener('DOMContentLoaded',init);
+</script>
+</body>
+</html>
