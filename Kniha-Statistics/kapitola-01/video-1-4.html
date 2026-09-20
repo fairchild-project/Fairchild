@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="sk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Video 1-4</title>
+  <style>
+    *{box-sizing:border-box}
+    html,body{margin:0;width:100%;height:100%;min-height:100%;background:#000;overflow:hidden}
+    body{position:fixed;inset:0}
+    #stage{position:fixed;inset:0;width:100vw;height:100dvh;background:#000;display:grid;place-items:center;overflow:hidden}
+    #native{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;border:0}
+    #drive{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
+    #msg{position:absolute;inset:0;display:none;place-items:center;padding:24px;color:#fff;background:#000;font:700 16px/1.4 Arial;text-align:center}
+    .hidden{display:none!important}
+    @media (min-width:769px){
+      body{position:static;overflow:auto;background:#05090e}
+      #stage{position:relative;width:min(430px,92vw);height:auto;aspect-ratio:9/16;margin:24px auto;border:1px solid #253342;border-radius:18px;overflow:hidden}
+    }
+  </style>
+</head>
+<body data-video-id="1-4">
+  <div id="stage">
+    <video id="native" class="hidden" controls playsinline webkit-playsinline preload="auto"></video>
+    <iframe id="drive" class="hidden" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+    <div id="msg"></div>
+  </div>
+  <script src="chapter-links.js?v=20260920-1705-v3"></script>
+  <script>
+  (()=>{
+    const id=document.body.dataset.videoId;
+    const item=((window.CHAPTER_LINKS||{}).supplementary||[]).find(x=>x.id===id);
+    const native=document.getElementById('native');
+    const drive=document.getElementById('drive');
+    const msg=document.getElementById('msg');
+    const mobile=matchMedia('(max-width:768px)').matches;
+    const fileId=(u)=>{if(!u)return null; const m=u.match(/\/file\/d\/([A-Za-z0-9_-]+)/); if(m)return m[1]; try{const p=new URL(u); return p.searchParams.get('id')}catch(e){return null}};
+    const placeholder=(u)=>!u||u.startsWith('VLOZ_')||u.startsWith('PASTE_');
+    const direct=(u)=>{const x=fileId(u); return x?`https://drive.google.com/uc?export=download&id=${x}`:u;};
+    const preview=(u)=>{const x=fileId(u); return x?`https://drive.google.com/file/d/${x}/preview?autoplay=1`:u;};
+    function showMsg(t){msg.textContent=t;msg.style.display='grid';}
+    function fallback(){native.pause();native.removeAttribute('src');native.classList.add('hidden');drive.src=preview(item.url);drive.classList.remove('hidden');}
+    if(!item||placeholder(item.url)){showMsg('Video link nie je nastavený v chapter-links.js');return;}
+    if(mobile){
+      native.src=direct(item.url);
+      native.classList.remove('hidden');
+      native.autoplay=true;
+      native.muted=false;
+      const p=native.play();
+      if(p&&p.catch) p.catch(()=>{native.muted=true; native.play().catch(()=>{});});
+      native.addEventListener('error', fallback, {once:true});
+      // Prvy dotyk: odmutuj a pokus sa prejst do skutocneho fullscreen rezimu.
+      const activate=()=>{
+        native.muted=false;
+        if(native.paused) native.play().catch(()=>{});
+        if(native.requestFullscreen) native.requestFullscreen().catch(()=>{});
+        else if(native.webkitEnterFullscreen) try{native.webkitEnterFullscreen();}catch(e){}
+      };
+      document.addEventListener('pointerup', activate, {once:true,passive:true});
+      document.addEventListener('touchend', activate, {once:true,passive:true});
+    } else {
+      drive.src=preview(item.url);
+      drive.classList.remove('hidden');
+    }
+  })();
+  </script>
+</body>
+</html>
