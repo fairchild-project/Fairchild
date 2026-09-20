@@ -56,7 +56,7 @@
 
   function drivePreview(url) {
     const id = driveFileId(url);
-    return id ? `https://drive.google.com/file/d/${id}/preview` : null;
+    return id ? `https://drive.google.com/file/d/${id}/preview?autoplay=1` : null;
   }
 
   function isDirectMedia(url) {
@@ -133,11 +133,12 @@
   }
 
   function configureQuestionButton() {
+    const mobile = window.matchMedia("(max-width: 900px)").matches;
     if (segmentIndex < quizzes.length) {
-      questionBtn.textContent = "PO DOPOZERANI: OTAZKA";
+      questionBtn.textContent = mobile ? "OTAZKA" : "PO DOPOZERANI: OTAZKA";
       questionBtn.dataset.action = "quiz";
     } else {
-      questionBtn.textContent = "PO DOPOZERANI: DOKONCIT KAPITOLU";
+      questionBtn.textContent = mobile ? "DOKONCIT" : "PO DOPOZERANI: DOKONCIT KAPITOLU";
       questionBtn.dataset.action = "finish";
     }
     show(questionBtn);
@@ -264,9 +265,14 @@
     passed = new Set();
     segmentIndex = 0;
     doneOverlay.classList.remove("show");
-    startOverlay.classList.add("show");
     updateProgress();
     status.textContent = "Pripravene";
+    if (window.matchMedia("(max-width: 900px)").matches) {
+      startOverlay.classList.remove("show");
+      renderSegment(0);
+    } else {
+      startOverlay.classList.add("show");
+    }
   });
 
   nativeVideo.addEventListener("error", () => {
@@ -274,4 +280,10 @@
   });
 
   updateProgress();
+
+  // Na mobile preskoc uvodnu HTML kartu a rovno nacitaj prvy video usek.
+  if (window.matchMedia("(max-width: 900px)").matches) {
+    startOverlay.classList.remove("show");
+    renderSegment(0);
+  }
 })();

@@ -69,6 +69,8 @@
   }
 
   if (isDirectMedia(item.url)) {
+    nativeVideo.autoplay = true;
+    nativeVideo.playsInline = true;
     nativeVideo.src = item.url;
     show(nativeVideo);
     nativeVideo.play().catch(() => {});
