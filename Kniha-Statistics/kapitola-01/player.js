@@ -322,12 +322,8 @@
     doneOverlay.classList.remove("show");
     updateProgress();
     status.textContent = "Pripravene";
-    if (window.matchMedia("(max-width: 900px)").matches) {
-      startOverlay.classList.remove("show");
-      renderSegment(0);
-    } else {
-      startOverlay.classList.add("show");
-    }
+    startOverlay.classList.remove("show");
+    renderSegment(0);
   });
 
   nativeVideo.addEventListener("error", () => {
@@ -336,9 +332,8 @@
 
   updateProgress();
 
-  // Na mobile preskoc uvodnu HTML kartu a rovno nacitaj prvy video usek.
-  if (window.matchMedia("(max-width: 900px)").matches) {
-    startOverlay.classList.remove("show");
-    renderSegment(0);
-  }
+  // V4: bez uvodnej HTML karty na desktope aj mobile.
+  // Stranka po otvoreni rovno nacita prvy video usek.
+  startOverlay.classList.remove("show");
+  renderSegment(0);
 })();
