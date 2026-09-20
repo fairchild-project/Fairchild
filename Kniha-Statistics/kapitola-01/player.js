@@ -59,6 +59,15 @@
     return id ? `https://drive.google.com/file/d/${id}/preview?autoplay=1` : null;
   }
 
+  function driveDirect(url) {
+    const id = driveFileId(url);
+    return id ? `https://drive.google.com/uc?export=download&id=${id}` : null;
+  }
+
+  function isMobile() {
+    return window.matchMedia("(max-width: 900px)").matches;
+  }
+
   function isDirectMedia(url) {
     if (!url) return false;
     return /\.(mp4|webm|ogg)(\?.*)?$/i.test(url);
@@ -108,6 +117,52 @@
 
     const preview = drivePreview(item.url);
     if (preview) {
+      if (isMobile()) {
+        const directUrl = driveDirect(item.url);
+        nativeVideo.src = directUrl;
+        nativeVideo.autoplay = true;
+        nativeVideo.playsInline = true;
+        nativeVideo.muted = false;
+        show(nativeVideo);
+        status.textContent = "Prehrava sa video";
+
+        let fellBack = false;
+        const fallbackToDrive = () => {
+          if (fellBack) return;
+          fellBack = true;
+          nativeVideo.pause();
+          nativeVideo.removeAttribute("src");
+          nativeVideo.load();
+          hide(nativeVideo);
+          driveFrame.src = preview;
+          show(driveFrame);
+          status.textContent = "Google Drive prehravac";
+          configureQuestionButton();
+        };
+
+        nativeVideo.addEventListener("error", fallbackToDrive, { once: true });
+        nativeVideo.addEventListener("ended", handleDirectVideoEnded, { once: true });
+        const tryPlay = nativeVideo.play();
+        if (tryPlay && tryPlay.catch) {
+          tryPlay.catch(() => {
+            nativeVideo.muted = true;
+            nativeVideo.play().catch(() => fallbackToDrive());
+          });
+        }
+
+        const activateFullscreen = () => {
+          nativeVideo.muted = false;
+          if (nativeVideo.paused) nativeVideo.play().catch(() => {});
+          if (nativeVideo.requestFullscreen) nativeVideo.requestFullscreen().catch(() => {});
+          else if (nativeVideo.webkitEnterFullscreen) {
+            try { nativeVideo.webkitEnterFullscreen(); } catch (_) {}
+          }
+        };
+        document.addEventListener("pointerup", activateFullscreen, { once: true, passive: true });
+        document.addEventListener("touchend", activateFullscreen, { once: true, passive: true });
+        return;
+      }
+
       driveFrame.src = preview;
       show(driveFrame);
       status.textContent = "Google Drive video - po dopozerani otvor otazku";
