@@ -19,7 +19,7 @@ window.CHAPTER_LINKS = {
   title: "Dataset a klasifikacia premennych",
 
   supplementary: [
-    { id: "1-1", title: "1.1 Co je vlastne dataset?", url: "https://drive.google.com/file/d/1_y2D5Sx4am6YXy3vYOPJQQ6TvugpniG-/view?usp=sharing" },
+    { id: "1-1", title: "1.1 Co je vlastne dataset?", url: "https://maksym.mykhei.website.tuke.sk/KEGA006Statistick/Kapitola1/1.1%20Co%20je%20vlastne%20dataset.mp4" },
     { id: "1-2", title: "1.2 Kvalitativna vs. kvantitativna premenna", url: "https://drive.google.com/file/d/1r5Hl3A1vlfBACo3wa5P40YRxsdLMXedA/view?usp=sharing" },
     { id: "1-3", title: "1.3 Nominalna vs. ordinalna premenna", url: "https://drive.google.com/file/d/11txthIAg2Ss0euEdr2H-TIpocs2-LPpy/view?usp=sharing" },
     { id: "1-4", title: "1.4 Diskretna vs. spojita premenna", url: "https://drive.google.com/file/d/1q2SUWnbTtSWsgPBEUc8WE63WXPYjsr5e/view?usp=sharing" },
