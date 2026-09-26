@@ -1,5 +1,6 @@
 (() => {
   "use strict";
+
   const cfg = window.CHAPTER_CONFIG || {};
   const videos = Array.isArray(cfg.review) ? cfg.review : [];
   const quizzes = Array.isArray(window.CHAPTER_QUIZZES) ? window.CHAPTER_QUIZZES : [];
@@ -44,7 +45,9 @@
   function renderSegment(index){
     state.mode="video";
     state.segmentIndex=index;
-    state.group=[]; state.pos=0; state.locked=false;
+    state.group=[];
+    state.pos=0;
+    state.locked=false;
     const item=videos[index];
     if(!item){ finishChapter(); return; }
     startOverlay.classList.remove("show"); quizOverlay.classList.remove("show"); doneOverlay.classList.remove("show");
@@ -60,15 +63,20 @@
 
   function beginQuiz(){
     state.group=(groups.get(state.segmentIndex+1)||[]).slice();
-    state.pos=0; state.mode="quiz";
+    state.pos=0;
+    state.mode="quiz";
     if(!state.group.length){ renderSegment(state.segmentIndex+1); return; }
     renderQuestion("");
   }
 
   function renderQuestion(message){
-    state.mode="quiz"; state.locked=false;
-    const q=state.group[state.pos]; if(!q) return;
-    stopMedia(); hide(questionBtn); hide(nextBtn); quizOverlay.classList.add("show");
+    state.mode="quiz";
+    state.locked=false;
+    const q=state.group[state.pos];
+    if(!q) return;
+    stopMedia();
+    hide(questionBtn); hide(nextBtn);
+    quizOverlay.classList.add("show");
     quizBadge.textContent=`CHECKPOINT ${q.checkpoint} · OTÁZKA ${state.pos+1} / ${state.group.length}`;
     question.textContent=q.question;
     visual.innerHTML=q.visual||"";
@@ -76,8 +84,15 @@
     feedback.className=message?"feedback bad":"feedback";
     answers.innerHTML="";
     q.answers.forEach((text,i)=>{
-      const b=document.createElement("button"); b.type="button"; b.className="answer"; b.textContent=`${i+1}. ${text}`;
-      b.addEventListener("click",ev=>{ ev.preventDefault(); ev.stopPropagation(); if(typeof ev.stopImmediatePropagation==="function") ev.stopImmediatePropagation(); handleAnswer(i,b); },true);
+      const b=document.createElement("button");
+      b.type="button";
+      b.className="answer";
+      b.textContent=`${i+1}. ${text}`;
+      b.addEventListener("click",ev=>{
+        ev.preventDefault(); ev.stopPropagation();
+        if(typeof ev.stopImmediatePropagation==="function") ev.stopImmediatePropagation();
+        handleAnswer(i,b);
+      },true);
       answers.appendChild(b);
     });
     status.textContent=`Otázka ${state.pos+1} z ${state.group.length}`;
@@ -85,26 +100,55 @@
 
   function handleAnswer(selected,button){
     if(state.mode!=="quiz"||state.locked) return;
-    const q=state.group[state.pos]; if(!q) return;
-    state.locked=true; answers.querySelectorAll(".answer").forEach(b=>b.disabled=true);
+    const q=state.group[state.pos];
+    if(!q) return;
+    state.locked=true;
+    answers.querySelectorAll(".answer").forEach(b=>b.disabled=true);
+
     if(selected===q.correct){
-      button.classList.add("correct"); feedback.textContent=q.ok; feedback.className="feedback ok"; state.passed.add(q.__index); updateProgress();
-      nextBtn.textContent=state.pos<state.group.length-1?"ĎALŠIA OTÁZKA →":"DOKONČIŤ CHECKPOINT →"; show(nextBtn); status.textContent="Správna odpoveď"; return;
+      button.classList.add("correct");
+      feedback.textContent=q.ok;
+      feedback.className="feedback ok";
+      state.passed.add(q.__index);
+      updateProgress();
+      nextBtn.textContent=state.pos<state.group.length-1?"ĎALŠIA OTÁZKA →":"DOKONČIŤ CHECKPOINT →";
+      show(nextBtn);
+      status.textContent="Správna odpoveď";
+      return;
     }
-    button.classList.add("wrong"); feedback.textContent="NESPRÁVNA ODPOVEĎ"; feedback.className="feedback bad"; status.textContent="Nesprávna odpoveď";
-    const failed=state.pos, target=Math.max(0,failed-1);
-    state.passed.delete(q.__index); if(state.group[target]) state.passed.delete(state.group[target].__index); updateProgress();
-    window.setTimeout(()=>{ if(state.mode!=="quiz") return; state.pos=target; renderQuestion(failed===0?"NESPRÁVNA ODPOVEĎ — skús túto otázku ešte raz.":`NESPRÁVNA ODPOVEĎ — vraciaš sa na otázku ${target+1}.`); },1200);
+
+    // Zlá odpoveď: najprv ju jasne ukáž červenou, až potom sa vráť.
+    button.classList.add("wrong");
+    feedback.textContent="NESPRÁVNA ODPOVEĎ";
+    feedback.className="feedback bad";
+    status.textContent="Nesprávna odpoveď";
+
+    const failed=state.pos;
+    const target=Math.max(0,failed-1);
+    state.passed.delete(q.__index);
+    if(state.group[target]) state.passed.delete(state.group[target].__index);
+    updateProgress();
+
+    window.setTimeout(()=>{
+      if(state.mode!=="quiz") return;
+      state.pos=target;
+      renderQuestion(failed===0
+        ? "NESPRÁVNA ODPOVEĎ — skús túto otázku ešte raz."
+        : `NESPRÁVNA ODPOVEĎ — vraciaš sa na otázku ${target+1}.`);
+    }, 1200);
   }
 
   function nextQuestion(ev){
-    ev.preventDefault(); ev.stopPropagation(); if(typeof ev.stopImmediatePropagation==="function") ev.stopImmediatePropagation();
+    ev.preventDefault(); ev.stopPropagation();
+    if(typeof ev.stopImmediatePropagation==="function") ev.stopImmediatePropagation();
     if(state.mode!=="quiz") return;
-    const q=state.group[state.pos]; if(!q||!state.passed.has(q.__index)) return;
+    const q=state.group[state.pos];
+    if(!q||!state.passed.has(q.__index)) return;
     if(state.pos<state.group.length-1){ state.pos++; renderQuestion(""); return; }
     const complete=state.group.every(item=>state.passed.has(item.__index));
     if(!complete){ const missing=state.group.findIndex(item=>!state.passed.has(item.__index)); state.pos=missing<0?0:missing; renderQuestion("Najprv správne dokonči všetky otázky tejto série."); return; }
-    quizOverlay.classList.remove("show"); renderSegment(state.segmentIndex+1);
+    quizOverlay.classList.remove("show");
+    renderSegment(state.segmentIndex+1);
   }
 
   function finishChapter(){ state.mode="done"; stopMedia(); hide(questionBtn); quizOverlay.classList.remove("show"); progressBar.style.width="100%"; progressLabel.textContent="Kapitola dokončená"; status.textContent="Hotovo"; doneOverlay.classList.add("show"); }
