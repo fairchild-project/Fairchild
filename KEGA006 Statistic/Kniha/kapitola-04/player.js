@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const BUILD = "kap4-multiquiz-2026-09-26-v4";
+  const BUILD = "kap4-multiquiz-2026-09-26-v5-prev-question";
   const cfg = window.CHAPTER_CONFIG || {};
   const videos = Array.isArray(cfg.review) ? cfg.review : [];
   const quizzes = Array.isArray(window.CHAPTER_QUIZZES) ? window.CHAPTER_QUIZZES : [];
@@ -190,8 +190,11 @@
       feedback.textContent = currentQuiz.bad;
       feedback.className = "feedback bad";
       hide(nextBtn);
+      backBtn.textContent = currentGroupPos > 0 ? "← PREDCHÁDZAJÚCA OTÁZKA" : "↻ SKÚSIŤ OTÁZKU ZNOVA";
       show(backBtn);
-      status.textContent = "Nespravna odpoved";
+      status.textContent = currentGroupPos > 0
+        ? "Nesprávna odpoveď · vráť sa na predchádzajúcu otázku"
+        : "Nesprávna odpoveď · skús prvú otázku znova";
     }
   }
 
@@ -231,9 +234,11 @@
   });
 
   backBtn.addEventListener("click", () => {
-    quizOverlay.classList.remove("show");
-    renderSegment(segmentIndex);
-    status.textContent = "Zopakuj vysvetlenie a skus otazku znova";
+    currentGroupPos = Math.max(0, currentGroupPos - 1);
+    showCurrentQuiz();
+    status.textContent = currentGroupPos === 0
+      ? "Skús otázku znova"
+      : `Späť na otázku ${currentGroupPos + 1} z ${currentGroup.length}`;
   });
 
   nextBtn.addEventListener("click", advanceFromQuiz);
