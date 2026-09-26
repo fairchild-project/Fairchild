@@ -1,98 +1,14 @@
 window.CHAPTER_QUIZZES = [
-  {
-    checkpoint: 1,
-    question: "Čo je najpresnejšia interpretácia zamietnutia H0?",
-    answers: [
-      "H1 je dokázaná s absolútnou istotou.",
-      "Dáta poskytujú dostatočný dôkaz proti H0 pri zvolenom pravidle testu.",
-      "H0 bola určite nepravdivá už pred zberom dát.",
-      "Každý pozorovaný rozdiel je prakticky dôležitý."
-    ],
-    correct: 1,
-    ok: "Správne. Test vyhodnocuje zlučiteľnosť dát s H0; zamietnutie H0 nie je absolútny dôkaz H1.",
-    bad: "Nesprávne. Vráť sa k logike H0/H1: test hľadá dôkaz proti východiskovému modelu H0.",
-    visual: `
-      <div class="hypo-visual" aria-label="Logika H0 a H1">
-        <div class="hypo-card blue"><b>H0</b><span>východiskový model</span></div>
-        <div class="hypo-arrow">DÔKAZ PROTI H0 →</div>
-        <div class="hypo-card pink"><b>H1</b><span>alternatíva</span></div>
-      </div>`
-  },
-  {
-    checkpoint: 2,
-    question: "Čo znamená p = 0,03 v správnej interpretácii?",
-    answers: [
-      "Je 3 % pravdepodobnosť, že H0 je pravdivá.",
-      "Ak H0 platí, rovnako alebo viac extrémne dáta by mali pravdepodobnosť približne 3 %.",
-      "Je 97 % pravdepodobnosť, že H1 je pravdivá.",
-      "Riziko chyby II. druhu je presne 3 %."
-    ],
-    correct: 1,
-    ok: "Správne. p-hodnota sa počíta za predpokladu platnosti H0 a meria extrémnosť dát voči tomuto modelu.",
-    bad: "Nesprávne. p-hodnota nie je pravdepodobnosť pravdivosti H0 ani H1.",
-    visual: `
-      <div class="pvalue-visual" aria-label="p-hodnota a alpha">
-        <div class="p-title">POROVNANIE</div>
-        <div class="p-row"><span>p</span><strong>0,03</strong></div>
-        <div class="p-row"><span>alpha</span><strong>0,05</strong></div>
-        <div class="p-rule">p &lt; alpha → dôkaz proti H0</div>
-      </div>`
-  },
-  {
-    checkpoint: 3,
-    question: "Kedy je vhodný jednovýberový t-test?",
-    answers: [
-      "Keď porovnávame priemer jednej vzorky s referenčnou hodnotou.",
-      "Keď porovnávame dve kategorizované premenné.",
-      "Keď ten istý človek absolvuje meranie pred a po.",
-      "Keď porovnávame tri a viac skupín bez ďalších podmienok."
-    ],
-    correct: 0,
-    ok: "Správne. Jednovýberový t-test porovnáva priemer jednej vzorky s hypotetickou alebo referenčnou hodnotou mu0.",
-    bad: "Nesprávne. V tomto teste máme jednu vzorku a jednu referenčnú hodnotu.",
-    visual: `
-      <div class="one-sample-visual" aria-label="Jednovyberovy t-test">
-        <div class="metric"><span>REFERENCIA</span><b>120</b></div>
-        <div class="vs">VS.</div>
-        <div class="metric mint"><span>PRIEMER VZORKY</span><b>118,31</b></div>
-      </div>`
-  },
-  {
-    checkpoint: 4,
-    question: "Pacientom zmeriame tlak pred liečbou a po liečbe. Ktorý postup zodpovedá párovému t-testu?",
-    answers: [
-      "Porovnať dve skupiny, akoby boli nezávislé.",
-      "Pre každého pacienta vytvoriť rozdiel d = po - pred a testovať priemer rozdielov.",
-      "Použiť chi-square test bez ohľadu na typ premennej.",
-      "Testovať osobitne priemer pred a osobitne priemer po proti nule."
-    ],
-    correct: 1,
-    ok: "Správne. Párový t-test pracuje s rozdielmi v pároch a testuje, či je ich priemer zlučiteľný s nulou.",
-    bad: "Nesprávne. Párovanie musí zostať zachované: základom sú rozdiely d v jednotlivých pároch.",
-    visual: `
-      <div class="paired-visual" aria-label="Parovy t-test">
-        <div class="pair-row"><span>PACIENT 1</span><b>132 → 126</b><em>d = -6</em></div>
-        <div class="pair-row"><span>PACIENT 2</span><b>128 → 125</b><em>d = -3</em></div>
-        <div class="pair-row"><span>PACIENT 3</span><b>135 → 130</b><em>d = -5</em></div>
-      </div>`
-  },
-  {
-    checkpoint: 5,
-    question: "Čo je správny postup pri posudzovaní normality pre párový t-test?",
-    answers: [
-      "Kontrolovať normalitu rozdielov d medzi párovými meraniami.",
-      "Kontrolovať iba skupinu PRED.",
-      "Kontrolovať iba skupinu PO.",
-      "Ak Shapiro-Wilk dá p < 0,05, vždy automaticky použiť neparametrický test."
-    ],
-    correct: 0,
-    ok: "Správne. Pri párovom t-teste sa predpoklad normality viaže na rozdiely d, ktoré test priamo analyzuje.",
-    bad: "Nesprávne. Predpoklady treba kontrolovať na veličine, ktorú daný test skutočne modeluje.",
-    visual: `
-      <div class="normality-visual" aria-label="Normalita rozdielov">
-        <div class="n-kicker">PÁROVÝ t-TEST</div>
-        <div class="n-flow"><span>PRED</span><b>−</b><span>PO</span><b>=</b><strong>ROZDIEL d</strong></div>
-        <div class="n-check">normalitu kontroluj tu ↑</div>
-      </div>`
-  }
+{checkpoint:1,question:"Čo najlepšie vystihuje úlohu nulovej hypotézy H0?",answers:["Je to východiskový model, proti ktorému hodnotíme dáta.","Je to hypotéza, ktorú test vždy musí potvrdiť.","Je to automaticky prakticky najdôležitejšie tvrdenie.","Je to pravdepodobnosť chyby I. druhu."],correct:0,ok:"Správne. H0 je východiskový model, voči ktorému posudzujeme kompatibilitu dát.",bad:"Nesprávne. H0 je východiskový model testu.",visual:`<svg viewBox="0 0 500 210" aria-label="H0 ako východiskový model"><rect x="35" y="55" width="155" height="95" rx="16" fill="rgba(88,214,243,.08)" stroke="#58d6f3"/><text x="112" y="92" text-anchor="middle" fill="#58d6f3" font-size="26" font-weight="800">H0</text><text x="112" y="120" text-anchor="middle" fill="#d8e1ea" font-size="13">východiskový model</text><line x1="205" y1="102" x2="320" y2="102" stroke="#8d9aaa" stroke-width="3"/><polygon points="320,102 306,94 306,110" fill="#8d9aaa"/><rect x="335" y="55" width="130" height="95" rx="16" fill="rgba(243,201,105,.06)" stroke="#f3c969"/><text x="400" y="92" text-anchor="middle" fill="#f3c969" font-size="18" font-weight="800">DÁTA</text><text x="400" y="120" text-anchor="middle" fill="#d8e1ea" font-size="13">posúdenie zhody</text></svg>`},
+{checkpoint:1,question:"Čo je najpresnejšia interpretácia zamietnutia H0?",answers:["H1 je dokázaná s absolútnou istotou.","Dáta poskytujú dostatočný dôkaz proti H0 pri zvolenom pravidle testu.","H0 bola určite nepravdivá už pred zberom dát.","Každý pozorovaný rozdiel je prakticky dôležitý."],correct:1,ok:"Správne. Zamietnutie H0 znamená dostatočný dôkaz proti H0, nie absolútny dôkaz H1.",bad:"Nesprávne. Zamietnutie H0 nie je absolútna istota.",visual:`<svg viewBox="0 0 500 210"><rect x="45" y="55" width="155" height="100" rx="16" fill="rgba(88,214,243,.08)" stroke="#58d6f3"/><text x="122" y="94" text-anchor="middle" fill="#58d6f3" font-size="26" font-weight="800">H0</text><text x="122" y="124" text-anchor="middle" fill="#d8e1ea" font-size="13">východisko</text><text x="250" y="78" text-anchor="middle" fill="#8d9aaa" font-size="12">DÔKAZ PROTI H0</text><line x1="210" y1="110" x2="325" y2="110" stroke="#f25c7f" stroke-width="4"/><polygon points="325,110 310,101 310,119" fill="#f25c7f"/><rect x="340" y="55" width="115" height="100" rx="16" fill="rgba(242,92,127,.07)" stroke="#f25c7f"/><text x="398" y="94" text-anchor="middle" fill="#f25c7f" font-size="26" font-weight="800">H1</text><text x="398" y="124" text-anchor="middle" fill="#d8e1ea" font-size="13">alternatíva</text></svg>`},
+{checkpoint:2,question:"Čo znamená p = 0,03 v správnej interpretácii?",answers:["Je 3 % pravdepodobnosť, že H0 je pravdivá.","Ak H0 platí, rovnako alebo viac extrémne dáta by mali pravdepodobnosť približne 3 %.","Je 97 % pravdepodobnosť, že H1 je pravdivá.","Riziko chyby II. druhu je presne 3 %."],correct:1,ok:"Správne. p-hodnota sa počíta za predpokladu platnosti H0.",bad:"Nesprávne. p-hodnota nie je pravdepodobnosť pravdivosti H0 ani H1.",visual:`<svg viewBox="0 0 500 210"><text x="250" y="38" text-anchor="middle" fill="#f3c969" font-size="16" font-weight="800">POROVNANIE p A α</text><rect x="80" y="68" width="150" height="90" rx="14" fill="rgba(88,214,243,.07)" stroke="#58d6f3"/><text x="155" y="104" text-anchor="middle" fill="#8d9aaa" font-size="13">p</text><text x="155" y="136" text-anchor="middle" fill="#58d6f3" font-size="28" font-weight="900">0,03</text><rect x="270" y="68" width="150" height="90" rx="14" fill="rgba(243,201,105,.06)" stroke="#f3c969"/><text x="345" y="104" text-anchor="middle" fill="#8d9aaa" font-size="13">α</text><text x="345" y="136" text-anchor="middle" fill="#f3c969" font-size="28" font-weight="900">0,05</text></svg>`},
+{checkpoint:2,question:"Ak p = 0,08 a α = 0,05, aké rozhodnutie zodpovedá bežnému pravidlu testu?",answers:["H0 zamietneme, pretože p > α.","H0 nezamietneme, pretože p > α.","H1 je dokázaná.","Musíme vždy zmeniť α na 0,10."],correct:1,ok:"Správne. Pri p > α nemáme podľa zvoleného pravidla dostatok dôkazov na zamietnutie H0.",bad:"Nesprávne. Porovnaj p-hodnotu s α.",visual:`<svg viewBox="0 0 500 190"><line x1="70" y1="110" x2="430" y2="110" stroke="#8d9aaa" stroke-width="3"/><circle cx="230" cy="110" r="10" fill="#f3c969"/><circle cx="310" cy="110" r="10" fill="#58d6f3"/><text x="230" y="82" text-anchor="middle" fill="#f3c969" font-size="14" font-weight="800">α = 0,05</text><text x="310" y="82" text-anchor="middle" fill="#58d6f3" font-size="14" font-weight="800">p = 0,08</text><text x="250" y="150" text-anchor="middle" fill="#8d9aaa" font-size="13">porovnaj polohu p voči α</text></svg>`},
+{checkpoint:3,question:"Kedy je vhodný jednovýberový t-test?",answers:["Keď porovnávame priemer jednej vzorky s referenčnou hodnotou.","Keď porovnávame dve kategorizované premenné.","Keď ten istý človek absolvuje meranie pred a po.","Keď porovnávame tri a viac skupín bez ďalších podmienok."],correct:0,ok:"Správne. Jednovýberový t-test porovnáva priemer jednej vzorky s referenčnou hodnotou.",bad:"Nesprávne. Máme jednu vzorku a jednu referenčnú hodnotu.",visual:`<svg viewBox="0 0 500 210"><rect x="65" y="65" width="140" height="90" rx="14" fill="rgba(243,201,105,.06)" stroke="#f3c969"/><text x="135" y="98" text-anchor="middle" fill="#8d9aaa" font-size="12">REFERENCIA</text><text x="135" y="133" text-anchor="middle" fill="#f3c969" font-size="28" font-weight="900">120</text><text x="250" y="116" text-anchor="middle" fill="#d8e1ea" font-size="18" font-weight="800">VS.</text><rect x="295" y="65" width="140" height="90" rx="14" fill="rgba(99,230,190,.06)" stroke="#63e6be"/><text x="365" y="98" text-anchor="middle" fill="#8d9aaa" font-size="12">PRIEMER VZORKY</text><text x="365" y="133" text-anchor="middle" fill="#63e6be" font-size="25" font-weight="900">118,31</text></svg>`},
+{checkpoint:3,question:"Čo predstavuje μ0 v jednovýberovom t-teste?",answers:["Pozorovaný priemer vzorky.","Referenčný alebo hypotetický populačný priemer.","Smerodajnú odchýlku vzorky.","Počet pozorovaní."],correct:1,ok:"Správne. μ0 je referenčná hodnota populačného priemeru, voči ktorej testujeme vzorku.",bad:"Nesprávne. μ0 je referenčný priemer v nulovej hypotéze.",visual:`<svg viewBox="0 0 500 190"><text x="250" y="54" text-anchor="middle" fill="#f3c969" font-size="30" font-weight="900">μ₀</text><line x1="250" y1="68" x2="250" y2="126" stroke="#8d9aaa" stroke-width="3"/><rect x="140" y="126" width="220" height="42" rx="12" fill="rgba(243,201,105,.06)" stroke="#f3c969"/><text x="250" y="152" text-anchor="middle" fill="#d8e1ea" font-size="14">referenčná hodnota v H0</text></svg>`},
+{checkpoint:3,question:"Ak chceme porovnať priemernú hodnotu v jednej vzorke s normou 100, ktorý test je prirodzený kandidát?",answers:["Párový t-test.","Chi-square test.","Jednovýberový t-test.","Fisherov exaktný test."],correct:2,ok:"Správne. Jedna vzorka sa porovnáva s jedinou referenčnou hodnotou.",bad:"Nesprávne. Ide o jednu vzorku a jednu referenčnú hodnotu.",visual:`<svg viewBox="0 0 500 200"><circle cx="165" cy="105" r="65" fill="rgba(88,214,243,.06)" stroke="#58d6f3"/><text x="165" y="96" text-anchor="middle" fill="#58d6f3" font-size="16" font-weight="800">1 VZORKA</text><text x="165" y="123" text-anchor="middle" fill="#d8e1ea" font-size="13">výberový priemer</text><line x1="235" y1="105" x2="330" y2="105" stroke="#8d9aaa" stroke-width="3"/><rect x="340" y="70" width="95" height="70" rx="12" fill="rgba(243,201,105,.06)" stroke="#f3c969"/><text x="388" y="99" text-anchor="middle" fill="#8d9aaa" font-size="11">NORMA</text><text x="388" y="123" text-anchor="middle" fill="#f3c969" font-size="24" font-weight="900">100</text></svg>`},
+{checkpoint:4,question:"Pacientom zmeriame tlak pred liečbou a po liečbe. Ktorý postup zodpovedá párovému t-testu?",answers:["Porovnať dve skupiny, akoby boli nezávislé.","Pre každého pacienta vytvoriť rozdiel d = po - pred a testovať priemer rozdielov.","Použiť chi-square test bez ohľadu na typ premennej.","Testovať osobitne priemer pred a po proti nule."],correct:1,ok:"Správne. Párový t-test pracuje s rozdielmi v pároch.",bad:"Nesprávne. Párovanie musí zostať zachované.",visual:`<svg viewBox="0 0 500 230"><text x="70" y="42" fill="#8d9aaa" font-size="12">PACIENT</text><text x="210" y="42" fill="#58d6f3" font-size="12">PRED</text><text x="320" y="42" fill="#63e6be" font-size="12">PO</text><text x="405" y="42" fill="#f3c969" font-size="12">d</text><g font-size="15" font-weight="700"><text x="72" y="82" fill="#d8e1ea">1</text><text x="210" y="82" fill="#58d6f3">132</text><text x="320" y="82" fill="#63e6be">126</text><text x="405" y="82" fill="#f3c969">-6</text><text x="72" y="126" fill="#d8e1ea">2</text><text x="210" y="126" fill="#58d6f3">128</text><text x="320" y="126" fill="#63e6be">125</text><text x="405" y="126" fill="#f3c969">-3</text><text x="72" y="170" fill="#d8e1ea">3</text><text x="210" y="170" fill="#58d6f3">135</text><text x="320" y="170" fill="#63e6be">130</text><text x="405" y="170" fill="#f3c969">-5</text></g></svg>`},
+{checkpoint:4,question:"Ktorá situácia skôr patrí k t-testu pre dve nezávislé skupiny?",answers:["Tlak rovnakých pacientov pred a po liečbe.","Porovnanie priemeru mužov a žien, kde každý človek patrí iba do jednej skupiny.","Porovnanie jednej vzorky s hodnotou 100.","Kontrola normality rozdielov v pároch."],correct:1,ok:"Správne. Dve oddelené skupiny bez prirodzeného párovania sú nezávislé.",bad:"Nesprávne. Hľadaj dve oddelené skupiny bez párov.",visual:`<svg viewBox="0 0 500 210"><circle cx="150" cy="105" r="68" fill="rgba(88,214,243,.06)" stroke="#58d6f3"/><circle cx="350" cy="105" r="68" fill="rgba(99,230,190,.06)" stroke="#63e6be"/><text x="150" y="100" text-anchor="middle" fill="#58d6f3" font-size="17" font-weight="800">SKUPINA A</text><text x="150" y="125" text-anchor="middle" fill="#d8e1ea" font-size="12">iné osoby</text><text x="350" y="100" text-anchor="middle" fill="#63e6be" font-size="17" font-weight="800">SKUPINA B</text><text x="350" y="125" text-anchor="middle" fill="#d8e1ea" font-size="12">iné osoby</text></svg>`},
+{checkpoint:5,question:"Čo je správny postup pri posudzovaní normality pre párový t-test?",answers:["Kontrolovať normalitu rozdielov d medzi párovými meraniami.","Kontrolovať iba skupinu PRED.","Kontrolovať iba skupinu PO.","Ak Shapiro-Wilk dá p < 0,05, vždy automaticky použiť neparametrický test."],correct:0,ok:"Správne. Pri párovom t-teste sa normalita viaže na rozdiely d.",bad:"Nesprávne. Kontroluj veličinu, ktorú test skutočne analyzuje.",visual:`<svg viewBox="0 0 500 210"><rect x="55" y="72" width="105" height="65" rx="12" fill="rgba(88,214,243,.06)" stroke="#58d6f3"/><text x="108" y="112" text-anchor="middle" fill="#58d6f3" font-size="17" font-weight="800">PRED</text><text x="200" y="111" text-anchor="middle" fill="#d8e1ea" font-size="24">−</text><rect x="235" y="72" width="105" height="65" rx="12" fill="rgba(99,230,190,.06)" stroke="#63e6be"/><text x="288" y="112" text-anchor="middle" fill="#63e6be" font-size="17" font-weight="800">PO</text><text x="375" y="111" text-anchor="middle" fill="#d8e1ea" font-size="24">=</text><text x="440" y="101" text-anchor="middle" fill="#f3c969" font-size="18" font-weight="900">d</text><text x="440" y="126" text-anchor="middle" fill="#8d9aaa" font-size="11">normalita</text></svg>`},
+{checkpoint:5,question:"Pri veľmi malých očakávaných početnostiach v kontingenčnej tabuľke 2×2 je často vhodnejší ktorý test?",answers:["Jednovýberový t-test.","Párový t-test.","Fisherov exaktný test.","Pearsonova korelácia."],correct:2,ok:"Správne. Fisherov exaktný test je vhodný najmä pri malých početnostiach v 2×2 tabuľkách.",bad:"Nesprávne. Ide o test asociácie kategorizovaných premenných pri malých početnostiach.",visual:`<svg viewBox="0 0 500 230"><text x="250" y="34" text-anchor="middle" fill="#f3c969" font-size="15" font-weight="800">2 × 2 TABUĽKA</text><rect x="125" y="60" width="250" height="130" rx="12" fill="none" stroke="#304050"/><line x1="250" y1="60" x2="250" y2="190" stroke="#304050"/><line x1="125" y1="125" x2="375" y2="125" stroke="#304050"/><text x="188" y="103" text-anchor="middle" fill="#58d6f3" font-size="24" font-weight="900">2</text><text x="313" y="103" text-anchor="middle" fill="#58d6f3" font-size="24" font-weight="900">3</text><text x="188" y="168" text-anchor="middle" fill="#63e6be" font-size="24" font-weight="900">1</text><text x="313" y="168" text-anchor="middle" fill="#63e6be" font-size="24" font-weight="900">4</text></svg>`},
+{checkpoint:5,question:"Ktoré tvrdenie o voľbe testu je najrozumnejšie?",answers:["Typ testu závisí od typu premenných, dizajnu a predpokladov.","Vždy stačí použiť t-test.","Najlepší test je vždy ten s najmenšou p-hodnotou.","Normalitu a závislosť meraní netreba zohľadňovať."],correct:0,ok:"Správne. Voľba testu vychádza z dátového typu, dizajnu a relevantných predpokladov.",bad:"Nesprávne. Test sa vyberá podľa dát a dizajnu, nie podľa želaného výsledku.",visual:`<svg viewBox="0 0 500 230"><rect x="45" y="42" width="125" height="58" rx="12" fill="rgba(88,214,243,.06)" stroke="#58d6f3"/><text x="108" y="76" text-anchor="middle" fill="#58d6f3" font-size="13" font-weight="800">TYP PREMENNEJ</text><rect x="188" y="42" width="125" height="58" rx="12" fill="rgba(99,230,190,.06)" stroke="#63e6be"/><text x="250" y="76" text-anchor="middle" fill="#63e6be" font-size="13" font-weight="800">DIZAJN</text><rect x="330" y="42" width="125" height="58" rx="12" fill="rgba(243,201,105,.06)" stroke="#f3c969"/><text x="392" y="76" text-anchor="middle" fill="#f3c969" font-size="13" font-weight="800">PREDPOKLADY</text><line x1="108" y1="108" x2="225" y2="160" stroke="#8d9aaa" stroke-width="2"/><line x1="250" y1="108" x2="250" y2="160" stroke="#8d9aaa" stroke-width="2"/><line x1="392" y1="108" x2="275" y2="160" stroke="#8d9aaa" stroke-width="2"/><rect x="175" y="160" width="150" height="48" rx="12" fill="rgba(242,92,127,.06)" stroke="#f25c7f"/><text x="250" y="190" text-anchor="middle" fill="#d8e1ea" font-size="14" font-weight="800">VOĽBA TESTU</text></svg>`}
 ];
