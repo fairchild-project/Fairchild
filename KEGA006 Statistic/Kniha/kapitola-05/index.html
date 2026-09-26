@@ -1,10 +1,208 @@
-<!doctype html><html lang="sk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>Kapitola 5 - Testovanie hypotez</title><link rel="stylesheet" href="../styles.css"><style>
-.visual{min-width:0;overflow:hidden}.visual>*{box-sizing:border-box;max-width:100%}.visual svg{width:100%;height:auto;display:block}.quiz-card>*{min-width:0}.feedback.bad{display:block!important;margin-top:14px;padding:14px 16px;border:1px solid #ff5f6d;border-radius:12px;background:rgba(255,95,109,.12);color:#ff6b7a!important;font-weight:900;letter-spacing:.02em}.feedback.ok{color:#63e6be!important}
-</style></head><body>
-<main class="shell"><header class="topbar"><div class="title-block"><div class="eyebrow">STATISTIKA &middot; KAPITOLA 5</div><h1>Testovanie hypotez</h1></div><div class="progress-wrap"><div class="progress-topline"><span id="progressLabel">Usek 1 / 6</span><span id="scoreLabel">0 / 12 otázok</span></div><div class="progress"><div id="progressBar"></div></div></div></header>
-<section class="player-card"><div class="stage" id="stage"><video id="nativeVideo" class="media-player hidden" controls playsinline preload="metadata"></video><iframe id="driveFrame" class="media-player hidden" title="Google Drive video" allow="autoplay; fullscreen" allowfullscreen></iframe><div id="missingVideo" class="missing-video hidden"><div class="missing-inner"><div class="badge warning">VIDEO LINK NIE JE NASTAVENY</div><h2 id="missingTitle">Dopln link</h2><p>Link vloz iba do hlavneho suboru <strong>video_links.js</strong>.</p></div></div>
-<div id="startOverlay" class="overlay show"><div class="start-card"><div class="badge">16:9 &middot; 6 casti &middot; 12 otázok</div><h2>Rekapitulácia Kapitoly 5</h2><p>Medzi segmentmi nasledujú 2–3 krátke otázky. Ďalší segment sa odomkne po ich správnom zvládnutí.</p><button id="startBtn" class="btn primary">SPUSTIT KAPITOLU</button></div></div>
-<div id="quizOverlay" class="overlay"><div class="quiz-card"><div class="quiz-head"><div id="quizBadge" class="badge">CHECKPOINT</div><div class="quiz-lock">Správna odpoveď odomkne ďalšiu otázku</div></div><div id="visual" class="visual"></div><section class="question-zone"><h2 id="question"></h2><div id="answers" class="answers"></div><div id="feedback" class="feedback" aria-live="polite"></div><div class="quiz-actions"><button id="backBtn" class="btn danger hidden">SPÄŤ</button><button id="nextBtn" class="btn success hidden">DALEJ &rarr;</button></div></section></div></div>
-<div id="doneOverlay" class="overlay"><div class="start-card"><div class="badge success-badge">HOTOVO</div><h2>Kapitola 5 je dokoncena</h2><p>Presiel si vsetky video segmenty a otázky.</p><button id="restartBtn" class="btn primary">PREJST ZNOVA</button></div></div></div>
-<div class="control-row"><div class="segment-info"><span id="segmentNumber" class="segment-number">01</span><div><div id="segmentTitle" class="segment-title">H0 a H1 - logika testu</div><div id="status" class="status">Pripravene</div></div></div><button id="questionBtn" class="btn question hidden">PO DOPOZERANI: OTÁZKY</button></div></section><p class="help-line"></p></main>
-<script src="../video_links.js"></script><script src="chapter.js?v=kap5-clean-1"></script><script src="questions.js?v=kap5-clean-1"></script><script src="player.js?v=kap5-clean-1"></script></body></html>
+<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Kapitola 5 - Testovanie hypotéz</title>
+<link rel="stylesheet" href="../styles.css">
+<style>
+  .visual{min-width:0;overflow:hidden}
+  .visual>*{box-sizing:border-box;max-width:100%}
+  .visual svg{width:100%;height:auto;display:block}
+  .quiz-card>*{min-width:0}
+  .answer.wrong{border-color:#ff5f6d!important;background:rgba(255,95,109,.18)!important;color:#fff!important;box-shadow:0 0 0 1px rgba(255,95,109,.35) inset}
+  .answer.correct{border-color:#63e6be!important;background:rgba(99,230,190,.16)!important;color:#fff!important}
+  .feedback.bad{display:block!important;margin-top:14px;padding:16px 18px;border:2px solid #ff5f6d;border-radius:12px;background:rgba(255,95,109,.14);color:#ff6b7a!important;font-weight:900;font-size:16px;letter-spacing:.025em;line-height:1.45}
+  .feedback.ok{display:block!important;margin-top:14px;color:#63e6be!important;font-weight:800}
+  .quiz-card{overflow:hidden}
+  @media(max-width:900px){.quiz-card{grid-template-columns:1fr!important}.visual{max-height:42vh;overflow:auto}}
+</style>
+</head>
+<body>
+<main class="shell">
+<header class="topbar">
+  <div class="title-block"><div class="eyebrow">STATISTIKA &middot; KAPITOLA 5</div><h1>Testovanie hypotéz</h1></div>
+  <div class="progress-wrap"><div class="progress-topline"><span id="progressLabel">Úsek 1 / 6</span><span id="scoreLabel">0 / 12 otázok</span></div><div class="progress"><div id="progressBar"></div></div></div>
+</header>
+<section class="player-card">
+<div class="stage" id="stage">
+  <video id="nativeVideo" class="media-player hidden" controls playsinline preload="metadata"></video>
+  <iframe id="driveFrame" class="media-player hidden" title="Google Drive video" allow="autoplay; fullscreen" allowfullscreen></iframe>
+  <div id="missingVideo" class="missing-video hidden"><div class="missing-inner"><div class="badge warning">VIDEO LINK NIE JE NASTAVENÝ</div><h2 id="missingTitle">Doplň link</h2><p>Link vlož iba do hlavného súboru <strong>video_links.js</strong>.</p></div></div>
+
+  <div id="startOverlay" class="overlay show"><div class="start-card">
+    <div class="badge">16:9 &middot; 6 častí &middot; 12 otázok</div>
+    <h2>Rekapitulácia Kapitoly 5</h2>
+    <p>Medzi segmentmi nasledujú 2–3 krátke otázky. Ďalší segment sa odomkne po ich správnom zvládnutí.</p>
+    <button id="startBtn" class="btn primary">SPUSTIŤ KAPITOLU</button>
+  </div></div>
+
+  <div id="quizOverlay" class="overlay"><div class="quiz-card">
+    <div class="quiz-head"><div id="quizBadge" class="badge">CHECKPOINT</div><div class="quiz-lock">Správna odpoveď odomkne ďalšiu otázku</div></div>
+    <div id="visual" class="visual"></div>
+    <section class="question-zone"><h2 id="question"></h2><div id="answers" class="answers"></div><div id="feedback" class="feedback" aria-live="assertive"></div><div class="quiz-actions"><button id="nextBtn" class="btn success hidden">ĎALEJ &rarr;</button></div></section>
+  </div></div>
+
+  <div id="doneOverlay" class="overlay"><div class="start-card"><div class="badge success-badge">HOTOVO</div><h2>Kapitola 5 je dokončená</h2><p>Prešiel si všetky video segmenty a otázky.</p><button id="restartBtn" class="btn primary">PREJSŤ ZNOVA</button></div></div>
+</div>
+<div class="control-row"><div class="segment-info"><span id="segmentNumber" class="segment-number">01</span><div><div id="segmentTitle" class="segment-title">H0 a H1 - logika testu</div><div id="status" class="status">Pripravené</div></div></div><button id="questionBtn" class="btn question hidden">PO DOPOZERANÍ: OTÁZKY</button></div>
+</section>
+<p class="help-line"></p>
+</main>
+
+<script src="../video_links.js"></script>
+<script src="chapter.js?v=kap5-inline-final"></script>
+<script src="questions.js?v=kap5-inline-final"></script>
+<script>
+(() => {
+  'use strict';
+  const cfg = window.CHAPTER_CONFIG || {};
+  const videos = cfg.review || [];
+  const quizzes = window.CHAPTER_QUIZZES || [];
+  const groups = new Map();
+  quizzes.forEach((q,i)=>{
+    const cp = Number(q.checkpoint || 1);
+    if(!groups.has(cp)) groups.set(cp,[]);
+    groups.get(cp).push({...q,__index:i});
+  });
+
+  const $ = id => document.getElementById(id);
+  const nativeVideo=$('nativeVideo'), driveFrame=$('driveFrame'), missingVideo=$('missingVideo'), missingTitle=$('missingTitle');
+  const startOverlay=$('startOverlay'), quizOverlay=$('quizOverlay'), doneOverlay=$('doneOverlay');
+  const startBtn=$('startBtn'), restartBtn=$('restartBtn'), questionBtn=$('questionBtn'), nextBtn=$('nextBtn');
+  const quizBadge=$('quizBadge'), question=$('question'), answers=$('answers'), feedback=$('feedback'), visual=$('visual');
+  const progressBar=$('progressBar'), progressLabel=$('progressLabel'), scoreLabel=$('scoreLabel'), segmentNumber=$('segmentNumber'), segmentTitle=$('segmentTitle'), status=$('status');
+
+  let segmentIndex=0;
+  let passed=new Set();
+  let currentGroup=[];
+  let currentGroupPos=0;
+  let currentQuiz=null;
+  let answerLocked=false;
+  let wrongTimer=null;
+
+  const hide = el => el && el.classList.add('hidden');
+  const show = el => el && el.classList.remove('hidden');
+
+  function isPlaceholder(url){return !url || /^VLOZ_/i.test(url) || /^https?:\/\/SEM_/i.test(url)}
+  function driveId(url){if(!url)return null;const m=url.match(/\/d\/([A-Za-z0-9_-]+)/)||url.match(/[?&]id=([A-Za-z0-9_-]+)/);return m?m[1]:null}
+  function stopAllMedia(){try{nativeVideo.pause()}catch(e){} nativeVideo.removeAttribute('src'); try{nativeVideo.load()}catch(e){} driveFrame.src='about:blank'}
+  function clearWrongTimer(){if(wrongTimer){clearTimeout(wrongTimer);wrongTimer=null}}
+
+  function updateProgress(){
+    const total=Math.max(videos.length,1);
+    progressBar.style.width=`${Math.min(100,(segmentIndex/total)*100)}%`;
+    progressLabel.textContent=`Úsek ${Math.min(segmentIndex+1,total)} / ${total}`;
+    scoreLabel.textContent=`${passed.size} / ${quizzes.length} otázok`;
+  }
+
+  function loadVideo(item){
+    stopAllMedia(); hide(nativeVideo); hide(driveFrame); hide(missingVideo);
+    const url=item&&item.url;
+    if(isPlaceholder(url)){missingTitle.textContent=`Doplň link pre ${item?item.key:'segment'}`;show(missingVideo);status.textContent='Video link nie je nastavený';return;}
+    const id=driveId(url);
+    if(id){driveFrame.src=`https://drive.google.com/file/d/${id}/preview`;show(driveFrame);status.textContent='Google Drive video';}
+    else{nativeVideo.src=url;show(nativeVideo);status.textContent='Video je pripravené';}
+  }
+
+  function renderSegment(index){
+    clearWrongTimer();
+    segmentIndex=index;
+    const item=videos[index];
+    if(!item){finishChapter();return;}
+    startOverlay.classList.remove('show');
+    quizOverlay.classList.remove('show');
+    doneOverlay.classList.remove('show');
+    segmentNumber.textContent=String(index+1).padStart(2,'0');
+    segmentTitle.textContent=item.title;
+    updateProgress();
+    loadVideo(item);
+    const cp=index+1;
+    if(groups.has(cp)){
+      const count=groups.get(cp).length;
+      questionBtn.dataset.action='quiz';
+      questionBtn.textContent=`PO DOPOZERANÍ: ${count} OTÁZKY`;
+      show(questionBtn);
+    } else {
+      questionBtn.dataset.action='finish';
+      questionBtn.textContent='DOKONČIŤ KAPITOLU';
+      show(questionBtn);
+    }
+  }
+
+  function showQuizGroupForSegment(){
+    const cp=segmentIndex+1;
+    currentGroup=groups.get(cp)||[];
+    currentGroupPos=0;
+    if(!currentGroup.length){renderSegment(segmentIndex+1);return;}
+    showCurrentQuiz();
+  }
+
+  function showCurrentQuiz(){
+    clearWrongTimer();
+    currentQuiz=currentGroup[currentGroupPos];
+    if(!currentQuiz)return;
+    answerLocked=false;
+    stopAllMedia();
+    hide(nativeVideo); hide(driveFrame); hide(missingVideo); hide(questionBtn);
+    quizBadge.textContent=`CHECKPOINT ${currentQuiz.checkpoint} · OTÁZKA ${currentGroupPos+1} / ${currentGroup.length}`;
+    question.textContent=currentQuiz.question;
+    visual.innerHTML=currentQuiz.visual||'';
+    feedback.textContent=''; feedback.className='feedback';
+    answers.innerHTML=''; hide(nextBtn);
+    currentQuiz.answers.forEach((text,i)=>{
+      const b=document.createElement('button');
+      b.type='button'; b.className='answer'; b.textContent=`${i+1}. ${text}`;
+      b.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();handleAnswer(i,b);},true);
+      answers.appendChild(b);
+    });
+    quizOverlay.classList.add('show');
+    status.textContent='Vyber odpoveď';
+  }
+
+  function handleAnswer(selected,button){
+    if(answerLocked||!currentQuiz)return;
+    answerLocked=true;
+    answers.querySelectorAll('.answer').forEach(b=>b.disabled=true);
+
+    if(selected===currentQuiz.correct){
+      button.classList.add('correct');
+      feedback.textContent=currentQuiz.ok;
+      feedback.className='feedback ok';
+      passed.add(currentQuiz.__index);
+      updateProgress();
+      nextBtn.textContent=currentGroupPos<currentGroup.length-1?'ĎALŠIA OTÁZKA →':'ĎALEJ →';
+      show(nextBtn);
+      status.textContent='Správna odpoveď';
+      return;
+    }
+
+    button.classList.add('wrong');
+    feedback.textContent='NESPRÁVNA ODPOVEĎ — '+currentQuiz.bad;
+    feedback.className='feedback bad';
+    status.textContent='Nesprávna odpoveď';
+
+    const target=Math.max(0,currentGroupPos-1);
+    wrongTimer=setTimeout(()=>{
+      currentGroupPos=target;
+      showCurrentQuiz();
+    },1800);
+  }
+
+  function finishChapter(){
+    clearWrongTimer();
+    stopAllMedia(); hide(nativeVideo); hide(driveFrame); hide(missingVideo); hide(questionBtn);
+    progressBar.style.width='100%'; progressLabel.textContent='Kapitola dokončená'; status.textContent='Hotovo'; doneOverlay.classList.add('show');
+  }
+
+  questionBtn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();questionBtn.dataset.action==='finish'?finishChapter():showQuizGroupForSegment();});
+  nextBtn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();if(!currentQuiz||!passed.has(currentQuiz.__index))return;if(currentGroupPos<currentGroup.length-1){currentGroupPos++;showCurrentQuiz();}else{quizOverlay.classList.remove('show');renderSegment(segmentIndex+1);}});
+  startBtn.addEventListener('click',e=>{e.preventDefault();startOverlay.classList.remove('show');renderSegment(0);});
+  restartBtn.addEventListener('click',e=>{e.preventDefault();passed=new Set();segmentIndex=0;doneOverlay.classList.remove('show');startOverlay.classList.add('show');updateProgress();status.textContent='Pripravené';});
+  nativeVideo.addEventListener('error',()=>status.textContent='Video sa nepodarilo načítať. Skontroluj video_links.js.');
+  updateProgress();
+})();
+</script>
+</body>
+</html>
