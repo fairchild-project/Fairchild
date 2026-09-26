@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const BUILD = "kap4-multiquiz-2026-09-26-v6-auto-prev-question";
+  const BUILD = "kap4-multiquiz-2026-09-26-v7-hard-prev-question";
   const cfg = window.CHAPTER_CONFIG || {};
   const videos = Array.isArray(cfg.review) ? cfg.review : [];
   const quizzes = Array.isArray(window.CHAPTER_QUIZZES) ? window.CHAPTER_QUIZZES : [];
@@ -187,20 +187,28 @@
       status.textContent = hasMore ? "Správne · pokračuj ďalšou otázkou" : "Checkpoint splnený";
     } else {
       button.classList.add("wrong");
-      feedback.textContent = currentQuiz.bad;
-      feedback.className = "feedback bad";
+      const targetPos = currentGroupPos > 0 ? currentGroupPos - 1 : 0;
+
+      // Zlá odpoveď NIKDY neotvorí video. Vráti sa priamo na
+      // predchádzajúcu otázku v tom istom checkpointe.
+      passed.delete(currentQuiz.__index);
+      if (currentGroup[targetPos]) passed.delete(currentGroup[targetPos].__index);
+      currentGroupPos = targetPos;
+      currentQuiz = currentGroup[currentGroupPos] || null;
+      updateProgress();
+
+      quizOverlay.classList.add("show");
+      hide(nativeVideo);
+      hide(driveFrame);
+      hide(missingVideo);
+      hide(questionBtn);
       hide(nextBtn);
       hide(backBtn);
 
-      const targetPos = currentGroupPos > 0 ? currentGroupPos - 1 : 0;
-      status.textContent = currentGroupPos > 0
-        ? `Nesprávne · návrat na otázku ${targetPos + 1}`
-        : "Nesprávne · prvá otázka sa zopakuje";
-
-      window.setTimeout(() => {
-        currentGroupPos = targetPos;
-        showCurrentQuiz();
-      }, 700);
+      showCurrentQuiz();
+      status.textContent = targetPos === 0
+        ? "Nesprávne · zopakuj otázku 1"
+        : `Nesprávne · späť na otázku ${targetPos + 1}`;
     }
   }
 
