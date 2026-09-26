@@ -28,19 +28,19 @@
       <iframe id="driveFrame" class="media-player hidden" title="Google Drive video" allow="autoplay; fullscreen" allowfullscreen></iframe>
       <div id="missingVideo" class="missing-video hidden"><div class="missing-inner"><div class="badge warning">VIDEO LINK NIE JE NASTAVENÝ</div><h2 id="missingTitle">Doplň link</h2><p>Link vlož iba do hlavného súboru <strong>video_links.js</strong>.</p></div></div>
 
-      <div id="startOverlay" class="overlay show"><div class="start-card"><div class="badge">16:9 &middot; 6 častí &middot; 12 otázok</div><h2>Rekapitulácia Kapitoly 5</h2><p>Medzi segmentmi nasledujú 2–3 krátke otázky. Ďalší segment sa odomkne až po ich správnom zvládnutí.</p><button id="startBtn" class="btn primary">SPUSTIŤ KAPITOLU</button></div></div>
+      <div id="startOverlay" class="overlay show"><div class="start-card"><div class="badge">16:9 &middot; 6 video segmentov &middot; 12 otázok</div><h2>Rekapitulácia Kapitoly 5</h2><p>Video segmenty sa striedajú so sériami 2–3 otázok. Po piatom checkpointe nasleduje ešte šiesty video segment.</p><button id="startBtn" class="btn primary">SPUSTIŤ KAPITOLU</button></div></div>
 
       <div id="quizOverlay" class="overlay"><div class="quiz-card"><div class="quiz-head"><div id="quizBadge" class="badge">CHECKPOINT</div><div class="quiz-lock">Správne zvládni celú sériu otázok</div></div><div id="visual" class="visual"></div><section class="question-zone"><h2 id="question"></h2><div id="answers" class="answers"></div><div id="feedback" class="feedback" aria-live="assertive"></div><div class="quiz-actions"><button id="nextBtn" class="btn success hidden">ĎALEJ &rarr;</button></div></section></div></div>
 
-      <div id="doneOverlay" class="overlay"><div class="start-card"><div class="badge success-badge">HOTOVO</div><h2>Kapitola 5 je dokončená</h2><p>Prešiel si všetky video segmenty a otázky.</p><button id="restartBtn" class="btn primary">PREJSŤ ZNOVA</button></div></div>
+      <div id="doneOverlay" class="overlay"><div class="start-card"><div class="badge success-badge">HOTOVO</div><h2>Kapitola 5 je dokončená</h2><p>Prešiel si všetkých 6 video segmentov a 12 otázok.</p><button id="restartBtn" class="btn primary">PREJSŤ ZNOVA</button></div></div>
     </div>
     <div class="control-row"><div class="segment-info"><span id="segmentNumber" class="segment-number">01</span><div><div id="segmentTitle" class="segment-title">H0 a H1 - logika testu</div><div id="status" class="status">Pripravené</div></div></div><button id="questionBtn" class="btn question hidden">PO DOPOZERANÍ: OTÁZKY</button></div>
   </section>
   <p class="help-line"></p>
 </main>
-<script src="../video_links.js"></script>
-<script src="chapter.js?v=kap5-redfix-20260926b"></script>
-<script src="questions.js?v=kap5-redfix-20260926b"></script>
-<script src="player.js?v=kap5-redfix-20260926b"></script>
+<script src="../video_links.js?v=kap5-video-fix-20260926"></script>
+<script src="chapter.js?v=kap5-video-fix-20260926"></script>
+<script src="questions.js?v=kap5-video-fix-20260926"></script>
+<script src="player.js?v=kap5-video-fix-20260926"></script>
 </body>
 </html>
