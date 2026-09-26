@@ -4,12 +4,12 @@
 */
 window.STATISTICS_VIDEO_LINKS = {
   "kap1": {
-    "segment1": "VLOZ_LINK_KAP1_SEGMENT1",
-    "segment2": "VLOZ_LINK_KAP1_SEGMENT2",
-    "segment3": "VLOZ_LINK_KAP1_SEGMENT3",
-    "segment4": "VLOZ_LINK_KAP1_SEGMENT4",
-    "segment5": "VLOZ_LINK_KAP1_SEGMENT5",
-    "segment6": "VLOZ_LINK_KAP1_SEGMENT6"
+    "segment1": "https://maksym.mykhei.website.tuke.sk/KEGA006Statistick/SSD%20segmenty/kapitola-01/kap1_segment1.mp4",
+    "segment2": "https://maksym.mykhei.website.tuke.sk/KEGA006Statistick/SSD%20segmenty/kapitola-01/kap1_segment2.mp4",
+    "segment3": "https://maksym.mykhei.website.tuke.sk/KEGA006Statistick/SSD%20segmenty/kapitola-01/kap1_segment3.mp4",
+    "segment4": "https://maksym.mykhei.website.tuke.sk/KEGA006Statistick/SSD%20segmenty/kapitola-01/kap1_segment4.mp4",
+    "segment5": "https://maksym.mykhei.website.tuke.sk/KEGA006Statistick/SSD%20segmenty/kapitola-01/kap1_segment5.mp4",
+    "segment6": "https://maksym.mykhei.website.tuke.sk/KEGA006Statistick/SSD%20segmenty/kapitola-01/kap1_segment6.mp4"
   },
   "kap2": {
     "segment1": "VLOZ_LINK_KAP2_SEGMENT1",
