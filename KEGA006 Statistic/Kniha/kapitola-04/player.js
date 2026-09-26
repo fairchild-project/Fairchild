@@ -117,17 +117,25 @@
       return;
     }
 
-    // Zlá odpoveď: NIKDY nevolá renderSegment ani loadVideo.
+    // Zlá odpoveď: najprv ju jasne ukáž červenou, až potom sa vráť.
     button.classList.add("wrong");
+    feedback.textContent="NESPRÁVNA ODPOVEĎ";
+    feedback.className="feedback bad";
+    status.textContent="Nesprávna odpoveď";
+
     const failed=state.pos;
     const target=Math.max(0,failed-1);
     state.passed.delete(q.__index);
     if(state.group[target]) state.passed.delete(state.group[target].__index);
-    state.pos=target;
     updateProgress();
-    renderQuestion(failed===0
-      ? "NESPRÁVNA ODPOVEĎ — skús túto otázku ešte raz."
-      : `NESPRÁVNA ODPOVEĎ — vraciaš sa na otázku ${target+1}.`);
+
+    window.setTimeout(()=>{
+      if(state.mode!=="quiz") return;
+      state.pos=target;
+      renderQuestion(failed===0
+        ? "NESPRÁVNA ODPOVEĎ — skús túto otázku ešte raz."
+        : `NESPRÁVNA ODPOVEĎ — vraciaš sa na otázku ${target+1}.`);
+    }, 1200);
   }
 
   function nextQuestion(ev){
