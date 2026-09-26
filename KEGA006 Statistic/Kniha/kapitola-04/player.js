@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const BUILD = "kap4-multiquiz-2026-09-26-v8-state-machine";
+  const BUILD = "kap4-2026-09-26-v9-final";
   const cfg = window.CHAPTER_CONFIG || {};
   const videos = Array.isArray(cfg.review) ? cfg.review : [];
   const quizzes = Array.isArray(window.CHAPTER_QUIZZES) ? window.CHAPTER_QUIZZES : [];
@@ -214,8 +214,8 @@
 
     // Vykreslime predchadzajucu otazku synchronne, stale v quiz mode.
     renderQuiz(failedPos === 0
-      ? "Nesprávne. Zopakuj túto otázku."
-      : `Nesprávne. Vrátil si sa na otázku ${prevPos + 1}.`);
+      ? "NESPRÁVNA ODPOVEĎ — skús túto otázku znova."
+      : `NESPRÁVNA ODPOVEĎ — vraciaš sa na otázku ${prevPos + 1}.`);
   }
 
   function advanceQuiz(ev) {
